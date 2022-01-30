@@ -34,9 +34,11 @@ class State:
         Inspect the State of Registers and Memory of 8085.
         """
         logger.info("Registers:")
+        print("Registers:")
         for key, value in self.registers.items():
             print("\t{}: {}".format(key, value))
         logger.info("Memory:")
+        print("\nMemory:")
         for key, value in self.memory.items():
             print("\t{}: {}".format(key, value))
 

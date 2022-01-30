@@ -1,0 +1,11 @@
+* 8085-Emulator
+
+Clone and run this repository
+#+begin_src shell
+  git clone https://github.com/hemanta212/8085-simulator
+  python -m pip install loguru
+  cd 8085-simulator
+  python main.py
+#+end_src
+
+Type help and run the commands!

@@ -80,6 +80,6 @@ def process_hex(cmdargs):
 
 if __name__ == "__main__":
     logger.remove()
-    logger.add(sys.stderr, level="DEBUG")
+    logger.add(sys.stderr, level="WARNING")
 #    logger.disable("__main__")
     main()
