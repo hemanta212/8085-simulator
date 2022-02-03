@@ -1,9 +1,9 @@
-* 8085-Emulator
+* 8085-Python
 
 Clone and run this repository
 #+begin_src shell
   git clone https://github.com/hemanta212/8085-simulator
-  python -m pip install loguru
+  python -m pip install loguru rich
   cd 8085-simulator
   python main.py
 #+end_src
@@ -87,4 +87,35 @@ A + 05H -> 5H
 
 #+begin_example
 A + 05H -> AH
+#+end_example
+
+#+begin_src shell
+>>> STA 3322H
+#+end_src
+
+#+begin_example
+3322H -> AH
+#+end_example
+
+#+begin_src shell
+>>> inspect
+#+end_src
+
+#+begin_example
+Registers:
+        A: 0xa
+        B: 0x05
+        C: 0x05
+        D: 0x00
+        E: 0x00
+        H: 0x00
+        L: 0x00
+        M: 0x00
+
+Memory:
+        0x0000: 0x33
+        0x0001: 0x9A
+        0x000A: 0x2B
+        0x000B: 0x34
+        0x3322: 0xa
 #+end_example
