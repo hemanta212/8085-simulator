@@ -9,3 +9,82 @@ Clone and run this repository
 #+end_src
 
 Type help and run the commands!
+
+** Example Workflow
+#+begin_src shell
+python main.py
+#+end_src
+
+#+begin_example
+Welcome to the 8085 emulator.
+Type 'help' for a list of commands.
+#+end_example
+
+#+begin_src shell
+>>> help
+#+end_src
+
+#+begin_example
+MOV - Move data from one register to another
+MVI - Move to immediate
+LXI - Load register pair immediate
+LDA - Load accumulator
+STA - Store accumulator
+HLT - Halt
+ADD - Add
+LDAX - Load accumulator from register pair
+#+end_example
+
+#+begin_src shell
+>>> inspect
+#+end_src
+
+#+begin_example
+Registers:
+        A: 0x00
+        B: 0x00
+        C: 0x00
+        D: 0x00
+        E: 0x00
+        H: 0x00
+        L: 0x00
+        M: 0x00
+
+Memory:
+        0x0000: 0x33
+        0x0001: 0x9A
+        0x000A: 0x2B
+        0x000B: 0x34
+#+end_example
+
+#+begin_src shell
+>>> MVI B 05H
+#+end_src
+
+#+begin_example
+B -> 05H
+#+end_example
+
+#+begin_src shell
+>>> MVI C 05H
+#+end_src
+
+#+begin_example
+C -> 05H
+#+end_example
+
+#+begin_src shell
+>>> ADD B
+#+end_src
+
+#+begin_example
+A + 05H -> 5H
+#+end_example
+
+#+begin_src shell
+>>> ADD C
+#+end_src
+
+#+begin_example
+A + 05H -> AH
+#+end_example

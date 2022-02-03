@@ -28,8 +28,6 @@ def main():
             cmd = cmd_processor(command, state)
             if cmd is not None and cmd.is_valid:
                 cmd.eval()
-            elif cmd is None:
-                print("Unknown command.")
 
 
 def cmd_processor(cmd: str, state: State) -> Command:
@@ -39,15 +37,19 @@ def cmd_processor(cmd: str, state: State) -> Command:
     cmd_list = tuple(cmd.split(" "))
     first, second = 0, 1
     cmdname, cmdargs = cmd_list[first], cmd_list[second:]
-    cmdargs = process_hex(cmdargs)
-    if cmdargs and cmdname in COMMANDS:
-        logger.debug(f"Command {cmdname} found.")
-        return Command(cmdname, cmdargs, state)
-    else:
+    p_cmdargs = process_hex(cmdargs)
+    if cmdname not in COMMANDS:
+        logger.error(f"Command {cmdname} found.")
         return None
+    elif cmdargs and not p_cmdargs:
+        return None
+    else:
+        logger.debug(f"Command {cmdname} found.")
+        return Command(cmdname, p_cmdargs, state)
 
 
 if __name__ == "__main__":
     logger.remove()
-    logger.add(sys.stderr, level="DEBUG")
+    logger.add("debug.log", level="DEBUG", rotation="1 MB")
+    logger.add(sys.stderr, level="WARNING")
     main()
