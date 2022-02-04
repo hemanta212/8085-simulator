@@ -1,5 +1,4 @@
 * 8085-Python
-
 Clone and run this repository
 #+begin_src shell
   git clone https://github.com/hemanta212/8085-simulator
@@ -10,7 +9,22 @@ Clone and run this repository
 
 Type help and run the commands!
 
-** Example Workflow
+** Table of contents
+:PROPERTIES:
+:TOC:      :include siblings :depth 2
+:END:
+:CONTENTS:
+- [[#repl-mode][REPL Mode]]
+- [[#command-line-arguments][Command line arguments]]
+- [[#example-repl-workflow][Example Repl Workflow]]
+- [[#example-command-line-workflow][Example Command line Workflow]]
+  - [[#the-file-option--f][The file option (-f)]]
+  - [[#the-command-option--c][The command option (-c)]]
+  - [[#the-json-file-db-option--db][The json file db option (-db)]]
+- [[#using-from-terminal-vim-and-emacs][Using From Terminal, VIm and Emacs]]
+:END:
+
+** REPL Mode
 #+begin_src shell
 python main.py
 #+end_src
@@ -18,6 +32,8 @@ python main.py
 #+begin_example
 Welcome to the 8085 emulator.
 Type 'help' for a list of commands.
+
+>>>
 #+end_example
 
 #+begin_src shell
@@ -33,89 +49,280 @@ STA - Store accumulator
 HLT - Halt
 ADD - Add
 LDAX - Load accumulator from register pair
+.....
 #+end_example
+
+** Command line arguments
+Beside repl, the interpreter can be entirely run from command line.
+#+begin_src shell
+  python main.py -h
+#+end_src
+
+#+begin_src shell
+  :8085 Interpreter:
+
+  help | --help | -h      : Display this message
+  -i                                   : Run in indirect mode, dont display welcome msg and >>> prompt
+  -db <FILENAME>    : Run in file db mode save and restore after each cmd from file
+  -f <FILENAME>       : Read command/commands from file
+  -c "cmd1;cmd2"       : Run cmd directly, separate with ";" for more than one commands
+
+    NOTE: In case of using multiple options, they need to be specified in order listed above.
+#+end_src
+
+The interpreter provides:
+- An option to run in raw plain mode without any welcome message or >>> prompt
+- An option to pass a file (containing commands line by line) to the interpreter to evaluate through '-f' option.
+- An option to save state after each command to a json file through  '-db' option.
+- An option to run commands in place through  '-c' option.
+
+** Example Repl Workflow
 
 #+begin_src shell
 >>> inspect
 #+end_src
+#+begin_src shell :exports results :results output
+echo "inspect" | python main.py -i
+#+end_src
 
+#+RESULTS:
 #+begin_example
 Registers:
-        A: 0x00
-        B: 0x00
-        C: 0x00
-        D: 0x00
-        E: 0x00
-        H: 0x00
-        L: 0x00
-        M: 0x00
+	A: 0x00
+	B: 0x00
+	C: 0x00
+	D: 0x00
+	E: 0x00
+	H: 0x00
+	L: 0x00
+	M: 0x00
 
 Memory:
-        0x0000: 0x33
-        0x0001: 0x9A
-        0x000A: 0x2B
-        0x000B: 0x34
+	0x0000: 0x33
+	0x0001: 0x9A
+	0x000A: 0x2B
+	0x000B: 0x34
 #+end_example
 
 #+begin_src shell
 >>> MVI B 05H
 #+end_src
+#+begin_src shell :exports results :results output
+echo "MVI B 05H" | python main.py -i -db temp33.json
+#+end_src
 
-#+begin_example
-B -> 05H
-#+end_example
+#+RESULTS:
+: B -> 05H
 
 #+begin_src shell
 >>> MVI C 05H
 #+end_src
+#+begin_src shell :exports results :results output
+echo "MVI C 05H" | python main.py -i -db temp33.json
+#+end_src
 
-#+begin_example
-C -> 05H
-#+end_example
+#+RESULTS:
+: C -> 05H
 
 #+begin_src shell
 >>> ADD B
 #+end_src
+#+begin_src shell :exports results :results output
+echo "ADD B" | python main.py -i -db temp33.json
+#+end_src
 
-#+begin_example
-A + 05H -> 5H
-#+end_example
+#+RESULTS:
+: A + 05H -> 5H
 
 #+begin_src shell
 >>> ADD C
 #+end_src
+#+begin_src shell :exports results :results output
+echo "ADD C" | python main.py -i -db temp33.json
+#+end_src
 
-#+begin_example
-A + 05H -> AH
-#+end_example
+#+RESULTS:
+: A + 05H -> AH
 
 #+begin_src shell
 >>> STA 3322H
 #+end_src
+#+begin_src shell :exports results :results output
+echo "STA 3322H" | python main.py -i -db temp33.json
+#+end_src
 
-#+begin_example
-3322H -> AH
-#+end_example
+#+RESULTS:
+: 3322H -> AH
 
 #+begin_src shell
 >>> inspect
 #+end_src
+#+begin_src shell :exports results :results output
+echo "inspect" | python main.py -i -db temp33.json
+#+end_src
 
+#+RESULTS:
 #+begin_example
 Registers:
-        A: 0xa
-        B: 0x05
-        C: 0x05
-        D: 0x00
-        E: 0x00
-        H: 0x00
-        L: 0x00
-        M: 0x00
+	A: 0xa
+	B: 0x05
+	C: 0x05
+	D: 0x00
+	E: 0x00
+	H: 0x00
+	L: 0x00
+	M: 0x00
 
 Memory:
-        0x0000: 0x33
-        0x0001: 0x9A
-        0x000A: 0x2B
-        0x000B: 0x34
-        0x3322: 0xa
+	0x0000: 0x33
+	0x0001: 0x9A
+	0x000A: 0x2B
+	0x000B: 0x34
+	0x3322: 0xa
+#+end_example
+
+** Example Command line Workflow
+*** The file option (-f)
+#+begin_src shell :exports both :results output
+  echo "MVI B 05H" > test.txt
+  echo "MVI A 00H" >> test.txt
+  python main.py -f test.txt
+#+end_src
+
+#+RESULTS:
+: B -> 05H
+: A -> 00H
+
+*** The command option (-c)
+#+begin_src shell  :exports both :results output
+  python main.py -c "MVI B 05H"
+#+end_src
+
+#+RESULTS:
+: B -> 05H
+
+#+begin_src shell :exports both :results output
+  python main.py -c "MVI A 00H; MVI B 05H; ADD B"
+#+end_src
+
+#+RESULTS:
+: A -> 00H
+: B -> 05H
+: A + 05H -> 5H
+
+*** The json file db option (-db)
+Specifying the file db option saves the state of interpreter to a json file and restores from it every time a *8085 command* is executed.
+
+This is useful when trying to run multiple -c commans as a session.
+#+begin_src shell :exports both :results output
+  python main.py -db db.json -c "MVI B 05H"
+#+end_src
+
+#+RESULTS:
+: B -> 05H
+
+#+begin_src shell :exports both :results output
+  python main.py -db db.json -c "MVI A 00H; ADD B"
+#+end_src
+
+#+RESULTS:
+: A -> 00H
+: A + 05H -> 5H
+
+#+begin_src shell :exports both :results output
+  python main.py -db db.json -c "STA 5555H; inspect"
+#+end_src
+
+#+RESULTS:
+#+begin_example
+5555H -> 5H
+Registers:
+	A: 0x5
+	B: 0x05
+	C: 0x00
+	D: 0x00
+	E: 0x00
+	H: 0x00
+	L: 0x00
+	M: 0x00
+
+Memory:
+	0x0000: 0x33
+	0x0001: 0x9A
+	0x000A: 0x2B
+	0x000B: 0x34
+	0x5555: 0x5
+#+end_example
+
+*** The plain/indirect mode option (-i)
+This is very useful for piping interactions to and from other application
+It is also recommended to run in -db file mode for continuous session-like interaction
+#+begin_src shell :exports both :results output
+  echo "MVI B 05H" | python main.py -i
+#+end_src
+
+#+RESULTS:
+: B -> 05H
+
+#+begin_src shell :exports both :results output
+  echo "MVI B 05H\nADD B" | python main.py -i
+#+end_src
+
+#+RESULTS:
+: B -> 05H
+: A + 05H -> 5H
+
+** Using From Terminal, VIm and Emacs
+The command line options provided by interpreter allows it to be used through editors like vim and emacs.
+Either you can:
+- Use the '-f' option and write and execute using a temp buffer/file
+- Use combination of '-c' and '-db' option to emulate a repl session
+- Use combnation of '-i' and '-db' option to emulate a repl session
+
+*** Example Emacs config
+With some configuratio, the interpreter can be made to work with Emacs' Org Mode using the org-babel-eval function
+This uses '-i' command option to write to the interpreter.
+
+Put this in your init.el file
+#+begin_src emacs-lisp
+  (defcustom path-to-8085 "~/dev/8085-interpreter"
+    "Path to folder where 8085-interpreter was cloned")
+
+  (defcustom org-babel-8085-command
+    (concat
+     "python"
+     (concat path-to-8085 "/main.py"))
+    "Name of the command for executing 8085 interpreter.")
+
+  (defun org-babel-execute:8085 (body params)
+    (let ((args (cdr (assoc :args params))))
+      (org-babel-eval
+       (concat
+        org-babel-8085-command
+        (if args  (concat " -i " args) " -i " ))
+       body)))
+#+end_src
+
+- The path-to-8085 should be folder where you cloned this project
+- The org-babel-8085-command should be the command to run the interpreter (eg python main.py)
+  - You could use (concat path-to-8085 ".venv/bin/python") in place of "python"  if you use in-project virutal environments
+
+Save and restart your emacs (or execute each block with C-x C-e).
+Then you can use org mode to write block like
+
+#+begin_example
+Use C-c C-c to execute a given block
+#+begin_src 8085
+MVI B 80H
+#+end_src
+
+For session like-use
+#+begin_src 8085 :args -db /tmp/8085-session1
+MVI B 80H
+#+end_src
+
+For verbose debugging
+#+begin_src 8085 :args -v d -db /tmp/8085-session1
+MVI B 80H
+#+end_src
 #+end_example

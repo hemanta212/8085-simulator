@@ -74,8 +74,19 @@ COMMANDS = {
     "LDAX": {
         "description": "Load accumulator from register pair",
         "function": "load_accumulator_from_register_pair",
-        "parameters": {
-            "register_pair": {k:REGISTER_PAIRS[k] for k in ("B", "D")}
-        },
+        "parameters": {"register_pair": {k: REGISTER_PAIRS[k] for k in ("B", "D")}},
     },
+}
+
+HANDLER_FORMAT = (
+    "<cyan>{name: >10}</cyan>: |"
+    "<level>{level: <8}</level> | "
+    "<cyan>{file}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+)
+
+LOG_LEVEL_SHORT_FORM = {
+    "d": "DEBUG",
+    "i": "INFO",
+    "w": "WARNING",
+    "e": "ERROR",
 }

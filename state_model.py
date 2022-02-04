@@ -1,6 +1,8 @@
 """
 State of Registers and Memory of 8085.
 """
+import os
+import json
 from loguru import logger
 from data import REGISTER_PAIRS
 
@@ -30,7 +32,7 @@ class State:
             "0x000B": "0x34",
         }
 
-    def get_register_pair_value(self, register:str)->str:
+    def get_register_pair_value(self, register: str) -> str:
         """
         From a register pair storing memory address, grabs the value store in the mem addr
 
@@ -47,7 +49,7 @@ class State:
         logger.debug(f"Loaded {value_at_mem_addr} from {mem_addr}")
         return value_at_mem_addr
 
-    def set_register_pair_value(self, value:str, register:str)->None:
+    def set_register_pair_value(self, value: str, register: str) -> None:
         REG1, REG2 = REGISTER_PAIRS[register]
         # Distribute the 16-bit hex in value literally half half to H and L
         # value -> 5533H --> '0x5533' -> [-2:] -> '0x55', '33' -> '0x' + '33'
@@ -57,16 +59,15 @@ class State:
         self.registers[REG1] = first_hex
         self.registers[REG2] = second_hex
         # Special case for M register
-        if register == 'H':
+        if register == "H":
             self.registers["M"] = self.get_register_pair_value("H")
         logger.debug(f"Pair {REG1}{REG2} Loaded: {first_hex}, {second_hex}")
 
-    def set_M(self, value:str)->None:
+    def set_M(self, value: str) -> None:
         self.set_register_pair_value(value, register="H")
 
-    def get_M(self)->str:
+    def get_M(self) -> str:
         return self.get_register_pair_value("H")
-
 
     @property
     def accumulator(self) -> str:
@@ -94,3 +95,29 @@ class State:
         print("\nMemory:")
         for key, value in self.memory.items():
             print("\t{}: {}".format(key, value))
+
+    def restore(self, file_db: str) -> None:
+        if not file_db or not os.path.exists(file_db):
+            return
+
+        with open(file_db, "r") as rf:
+            data = rf.read()
+            if not data.strip():
+                return
+
+        with open(file_db, "r") as rf:
+            state_data = json.load(rf)
+
+        self.registers = state_data["registers"]
+        self.memory = state_data["memory"]
+
+    def save(self, file_db: str) -> None:
+        if not file_db:
+            return
+        if not os.path.exists(file_db):
+            with open(file_db, "w"):
+                pass
+
+        data = {"registers": self.registers, "memory": self.memory}
+        with open(file_db, "w") as wf:
+            json.dump(data, wf)

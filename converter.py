@@ -1,5 +1,6 @@
+import os
 from loguru import logger
-
+from state_model import State
 from data import REGISTERS
 
 
@@ -45,3 +46,21 @@ def process_hex(cmdargs: tuple) -> tuple:
         processed_cmd_args[index] = hex_code
 
     return tuple(processed_cmd_args)
+
+
+def process_c_mode_args(args: list) -> tuple:
+    cmd = " ".join(args)
+    cmds = [i.strip() for i in cmd.split(";")]
+    logger.debug(f"Running in cmd mode: commands {cmds}")
+    return tuple(cmds)
+
+
+def process_file_mode_args(filename: str) -> tuple:
+    cmds = []
+    if not os.path.exists(filename):
+        logger.error(f"No file named {filename} found.")
+    with open(filename, "r") as rf:
+        # iterating on rf will yeield lines with \n at last
+        cmds = [line.strip() for line in rf]
+    logger.debug(f"Running in file mode: commands {cmds}")
+    return tuple(cmds)
