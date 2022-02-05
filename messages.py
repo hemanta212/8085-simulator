@@ -1,4 +1,5 @@
 from rich import print
+
 from data import COMMANDS
 
 
@@ -21,11 +22,12 @@ def msg_cli_help():
     """
     options = [
         ":8085 Interpreter:\n",
-        "help | --help | -h : Display this message",
-        "-i                 : Run in indirect mode, dont display welcome msg and >>> prompt",
-        "-db <FILENAME>     : Run in file db mode save and restore after each cmd from file",
-        "-f <FILENAME>      : Read command/commands from file",
-        '-c "cmd1;cmd2"     : Run cmd directly, separate with ";" for more than one commands',
+        "help | --help | -h: Display this message",
+        "-i                : Run in indirect mode, dont display welcome msg and >>> prompt",
+        "-v <d/i/w/e>      : Verbosity option use (d,i,w,e) for (DEBUG, INFO, WARNING, ERROR) resp.",
+        "-db <FILENAME>    : Run in file db mode save and restore after each cmd from file",
+        "-f <FILENAME>     : Read command/commands from file",
+        '-c "cmd1;cmd2"    : Run cmd directly, separate with ";" for more than one commands',
         "\nNOTE: In case of using multiple options, they need to be specified in order listed above.",
     ]
     msg = "\t\n".join(options)

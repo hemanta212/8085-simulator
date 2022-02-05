@@ -37,6 +37,20 @@ COMMANDS = {
             "value": "byte",
         },
     },
+    "INR": {
+        "description": "Increment Register",
+        "function": "increment_register",
+        "parameters": {
+            "register": REGISTERS,
+        },
+    },
+    "DCR": {
+        "description": "Decrement Register",
+        "function": "decrement_register",
+        "parameters": {
+            "register": REGISTERS,
+        },
+    },
     "LXI": {
         "description": "Load register pair immediate",
         "function": "load_register_pair_immediate",
@@ -71,10 +85,44 @@ COMMANDS = {
             "register": REGISTERS,
         },
     },
+    "ADI": {
+        "description": "Add Immediate",
+        "function": "add_immediate",
+        "parameters": {
+            "value": "byte",
+        },
+    },
+    "SUI": {
+        "description": "Subtract Immediate",
+        "function": "subtract_immediate",
+        "parameters": {
+            "value": "byte",
+        },
+    },
     "LDAX": {
         "description": "Load accumulator from register pair",
         "function": "load_accumulator_from_register_pair",
         "parameters": {"register_pair": {k: REGISTER_PAIRS[k] for k in ("B", "D")}},
+    },
+    "JZ": {
+        "description": "Jump If Zero",
+        "function": "jump_if_zero",
+        "parameters": {"word": "label"},
+    },
+    "JNZ": {
+        "description": "Jump If Not Zero",
+        "function": "jump_if_not_zero",
+        "parameters": {"word": "label"},
+    },
+    "JC": {
+        "description": "Jump If Carry",
+        "function": "jump_if_carry",
+        "parameters": {"word": "label"},
+    },
+    "JNC": {
+        "description": "Jump If Not Carry",
+        "function": "jump_if_not_carry",
+        "parameters": {"word": "label"},
     },
 }
 

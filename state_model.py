@@ -3,7 +3,10 @@ State of Registers and Memory of 8085.
 """
 import os
 import json
+from typing import Dict
+
 from loguru import logger
+
 from data import REGISTER_PAIRS
 
 
@@ -14,7 +17,7 @@ class State:
 
     def __init__(self):
         # Initialize state of registers with 0 hex values
-        self.registers = {
+        self.registers: Dict[str, str] = {
             "A": "0x00",
             "B": "0x00",
             "C": "0x00",
@@ -25,11 +28,18 @@ class State:
             "M": "0x00",
         }
         # Initialize few memory locations to garbage values
-        self.memory = {
+        self.memory: Dict[str, str] = {
             "0x0000": "0x33",
             "0x0001": "0x9A",
             "0x000A": "0x2B",
             "0x000B": "0x34",
+        }
+        # Initialize the flags
+        self.flags: Dict[str, bool] = {
+            "carry": False,
+            "auxillary_carry": False,
+            "zero": False,
+            "sign": False,
         }
 
     def get_register_pair_value(self, register: str) -> str:
@@ -95,14 +105,18 @@ class State:
         print("\nMemory:")
         for key, value in self.memory.items():
             print("\t{}: {}".format(key, value))
+        logger.info("Flags:")
+        print("\nFlags:")
+        for key, value in self.flags.items():
+            print("\t{}: {}".format(key, int(value)))
 
     def restore(self, file_db: str) -> None:
         if not file_db or not os.path.exists(file_db):
             return
 
         with open(file_db, "r") as rf:
-            data = rf.read()
-            if not data.strip():
+            file_data = rf.read()
+            if not file_data.strip():
                 return
 
         with open(file_db, "r") as rf:
@@ -118,6 +132,6 @@ class State:
             with open(file_db, "w"):
                 pass
 
-        data = {"registers": self.registers, "memory": self.memory}
+        state_data = {"registers": self.registers, "memory": self.memory}
         with open(file_db, "w") as wf:
-            json.dump(data, wf)
+            json.dump(state_data, wf)

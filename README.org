@@ -9,6 +9,22 @@ Clone and run this repository,
 
 Type =help= and run the commands listed.
 
+** Features
+[x] - Implement Registers and Memory
+[x] - Implement Basic commands (ADD, ADI, SUB, SUI, MOV, MVI, STA, LDA)
+[x] - Implement Xtended Register Pairs (LXI, M, LDAX)
+[x] - Write a ob-8085 for emacs org-mode (babel)
+[x] - Implement Flags (CY, Z, S)
+[x] - Implement labels and jumps (Loops) [Commands: JC, JNC, JZ, JNZ)
+[x] - Implement increment/decrements [INR, DCR]
+[ ] - Implement  Xtended increment/decrements [INX, DCX]
+[ ] - ... ( a lot of commands)
+[ ] - Implement proper 8-bit 16-bit type system and validation
+[ ] - Implement a stacktrace in case of errors
+[ ] - Implement integration test and actions CI
+[ ] - A pypi package and pyinstaller executable
+[ ] - Write a major mode for emacs.
+
 ** Table of contents
 :PROPERTIES:
 :TOC:      :include siblings :depth 2
@@ -23,7 +39,7 @@ Type =help= and run the commands listed.
   - [[#the-json-file-db-option--db][The json file db option (-db)]]
   - [[#the-plainindirect-mode-option--i][The plain/indirect mode option (-i)]]
   - [[#the-verbosity-logging-option--v][The verbosity logging option (-v)]]
-- [[#using-from-terminal-vim-and-emacs][Using From Terminal, VIm and Emacs]]
+- [[#using-from-terminal-vim-and-emacs][Using From Terminal, Vim and Emacs]]
   - [[#example-emacs-config][Example Emacs config]]
 :END:
 
@@ -302,7 +318,6 @@ You can customize the verbosity of logging messages by providing,
 #+RESULTS:
 : B -> 05H
 
-
 ** Using From Terminal, Vim and Emacs
 The command line options provided by interpreter allows it to be used through editors like Vim and Emacs.
 Either you can:
@@ -341,27 +356,23 @@ Put this in your =init.el= file,
 Save and restart your emacs (or execute each block with =C-x C-e=).
 Then you can use org mode to write block like:
 
-
 - Use =C-c C-c= to execute a given block.
-
-=#+begin_src 8085=
-
+#+begin_example
+,#+begin_src 8085 :args -v d -db /tmp/8085-session1
 MVI B 80H
-
-=#+end_src=
+,#+end_src
+#+end_example
 
 - For session-like use,
-=#+begin_src 8085 :args -db /tmp/8085-session1=
-
+#+begin_example
+,#+begin_src 8085 :args -v d -db /tmp/8085-session1
 MVI B 80H
-
-=#+end_src=
-
+,#+end_src
+#+end_example
 
 - For verbose logging,
-
-=#+begin_src 8085 :args -v d -db /tmp/8085-session1=
-
+#+begin_example
+,#+begin_src 8085 :args -v d -db /tmp/8085-session1
 MVI B 80H
-
-=#+end_src=
+,#+end_src
+#+end_example
