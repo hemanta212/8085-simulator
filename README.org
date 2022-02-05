@@ -10,20 +10,21 @@ Clone and run this repository,
 Type =help= and run the commands listed.
 
 ** Features
-[x] - Implement Registers and Memory
-[x] - Implement Basic commands (ADD, ADI, SUB, SUI, MOV, MVI, STA, LDA)
-[x] - Implement Xtended Register Pairs (LXI, M, LDAX)
-[x] - Write a ob-8085 for emacs org-mode (babel)
-[x] - Implement Flags (CY, Z, S)
-[x] - Implement labels and jumps (Loops) [Commands: JC, JNC, JZ, JNZ)
-[x] - Implement increment/decrements [INR, DCR]
-[ ] - Implement  Xtended increment/decrements [INX, DCX]
-[ ] - ... ( a lot of commands)
-[ ] - Implement proper 8-bit 16-bit type system and validation
-[ ] - Implement a stacktrace in case of errors
-[ ] - Implement integration test and actions CI
-[ ] - A pypi package and pyinstaller executable
-[ ] - Write a major mode for emacs.
+
+- [x] - Implement Registers and Memory
+- [x] - Implement Basic commands (ADD, ADI, SUB, SUI, MOV, MVI, STA, LDA)
+- [x] - Implement Xtended Register Pairs (LXI, M, LDAX)
+- [x] - Write a ob-8085 for emacs org-mode (babel)
+- [x] - Implement Flags (CY, Z, S)
+- [x] - Implement labels and jumps (Loops) [Commands: JC, JNC, JZ, JNZ)
+- [x] - Implement increment/decrements [INR, DCR]
+- [ ] - Implement  Xtended increment/decrements [INX, DCX]
+- [ ] - ... ( a lot of commands)
+- [ ] - Implement proper 8-bit 16-bit type system and validation
+- [ ] - Implement a stacktrace in case of errors
+- [ ] - Implement integration test and actions CI
+- [ ] - A pypi package and pyinstaller executable
+- [ ] - Write a major mode for emacs.
 
 ** Table of contents
 :PROPERTIES:
