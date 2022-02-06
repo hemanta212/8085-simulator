@@ -20,8 +20,10 @@ def process_instruction_args(cmdname: str, cmdargs: tuple) -> tuple:
     """
     processed_cmd_args = list(cmdargs)[:]
     cmd_parameters = COMMANDS[cmdname]["parameters"]
-    for (index, argument), p_type in zip(enumerate(cmdargs), cmd_parameters.values()):
-        if p_type == "byte":
+    # Every command's parameter is a dict of [p_name, p_type]
+    for (index, argument), p_name in zip(enumerate(cmdargs), cmd_parameters):
+        # both address and values are specified in simple hex (5533H, 05H) so process them
+        if p_name == "address" or p_name == "value":
             logger.debug(f"Processing to hex for '{argument=}'")
             hex_code = process_hex(argument)
             if not hex_code:

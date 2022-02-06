@@ -16,7 +16,7 @@ class Interpreter:
         - The pointer that points to index of next command to be executed
         - This pointer typically points to the last item of command_logs
         - However in Jump instruction it may point at any existing index
-        - In case, where the jump points to future labels, this pointer is set to None
+        - In case, where the jump points to future labels,
         - The is_execution_suspended is set to true and no further command is evaluated. They're only added to list.
         - In such case the wating_label is checked for the future label that's being waited
         - Once the re-evaluater recognizes the label has been defined the pointer resets to pointing last item in list

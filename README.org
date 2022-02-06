@@ -1,6 +1,6 @@
 * 8085-Python
 Clone and run this repository,
-#+begin_src shell
+#+begin_src shell :eval never
   git clone https://github.com/hemanta212/8085-simulator
   python -m pip install loguru rich
   cd 8085-simulator
@@ -8,6 +8,25 @@ Clone and run this repository,
 #+end_src
 
 Type =help= and run the commands listed.
+
+** Table of contents
+:PROPERTIES:
+:TOC:      :include siblings :depth 2
+:END:
+:CONTENTS:
+- [[#features][Features]]
+- [[#repl-mode][REPL Mode]]
+- [[#command-line-arguments][Command line arguments]]
+- [[#example-repl-workflow][Example Repl Workflow]]
+- [[#example-command-line-workflow][Example Command line Workflow]]
+  - [[#the-file-option--f][The file option (-f)]]
+  - [[#the-command-option--c][The command option (-c)]]
+  - [[#the-json-file-db-option--db][The json file db option (-db)]]
+  - [[#the-plainindirect-mode-option--i][The plain/indirect mode option (-i)]]
+  - [[#the-verbosity-logging-option--v][The verbosity logging option (-v)]]
+- [[#using-from-terminal-vim-and-emacs][Using From Terminal, Vim and Emacs]]
+  - [[#example-emacs-config][Example Emacs config]]
+:END:
 
 ** Features
 
@@ -26,54 +45,49 @@ Type =help= and run the commands listed.
 - [ ] - A pypi package and pyinstaller executable
 - [ ] - Write a major mode for emacs.
 
-** Table of contents
-:PROPERTIES:
-:TOC:      :include siblings :depth 2
-:END:
-:CONTENTS:
-- [[#repl-mode][REPL Mode]]
-- [[#command-line-arguments][Command line arguments]]
-- [[#example-repl-workflow][Example Repl Workflow]]
-- [[#example-command-line-workflow][Example Command line Workflow]]
-  - [[#the-file-option--f][The file option (-f)]]
-  - [[#the-command-option--c][The command option (-c)]]
-  - [[#the-json-file-db-option--db][The json file db option (-db)]]
-  - [[#the-plainindirect-mode-option--i][The plain/indirect mode option (-i)]]
-  - [[#the-verbosity-logging-option--v][The verbosity logging option (-v)]]
-- [[#using-from-terminal-vim-and-emacs][Using From Terminal, Vim and Emacs]]
-  - [[#example-emacs-config][Example Emacs config]]
-:END:
-
 ** REPL Mode
-#+begin_src shell
+#+begin_src shell :exports both :results output
 python main.py
 #+end_src
 
-#+begin_example
-Welcome to the 8085 emulator.
-Type 'help' for a list of commands.
+#+RESULTS:
+: Welcome to the 8085 emulator.
+: Type 'help' for a list of commands.
+: >>>
 
->>>
-#+end_example
-
-#+begin_src shell
+#+begin_src shell :eval never
 >>> help
 #+end_src
+#+begin_src shell :exports results :results output
+echo "help" | python main.py -i
+#+end_src
 
+#+RESULTS:
 #+begin_example
 MOV - Move data from one register to another
 MVI - Move to immediate
+INR - Increment Register
+DCR - Decrement Register
 LXI - Load register pair immediate
 LDA - Load accumulator
 STA - Store accumulator
 HLT - Halt
 ADD - Add
+ADI - Add Immediate
+SUI - Subtract Immediate
 LDAX - Load accumulator from register pair
-.....
+JZ - Jump If Zero
+JNZ - Jump If Not Zero
+JC - Jump If Carry
+JNC - Jump If Not Carry
 #+end_example
 
 ** Command line arguments
 Beside repl, the interpreter can be entirely run from command line.
+#+begin_src shell :exports none :results none
+# Cleanup previous eval files if any (during the all eval C-c C-v b)
+  rm -f /tmp/pyassm-readme-01 /tmp/pyassm-readme-02
+#+end_src
 #+begin_src shell :exports both :results output :wrap example
   python main.py --help
 #+end_src
@@ -111,7 +125,7 @@ Providing options otherwise will result in an error.
 
 ** Example Repl Workflow
 
-#+begin_src shell
+#+begin_src shell :eval never
 >>> inspect
 #+end_src
 #+begin_src shell :exports results :results output
@@ -135,63 +149,69 @@ Memory:
 	0x0001: 0x9A
 	0x000A: 0x2B
 	0x000B: 0x34
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
 #+end_example
 
-#+begin_src shell
+#+begin_src shell :eval never
 >>> MVI B 05H
 #+end_src
 #+begin_src shell :exports results :results output
-echo "MVI B 05H" | python main.py -i -db temp33.json
+echo "MVI B 05H" | python main.py -i -db /tmp/pyassm-readme-01
 #+end_src
 
 #+RESULTS:
 : B -> 05H
 
-#+begin_src shell
+#+begin_src shell :eval never
 >>> MVI C 05H
 #+end_src
 #+begin_src shell :exports results :results output
-echo "MVI C 05H" | python main.py -i -db temp33.json
+echo "MVI C 05H" | python main.py -i -db /tmp/pyassm-readme-01
 #+end_src
 
 #+RESULTS:
 : C -> 05H
 
-#+begin_src shell
+#+begin_src shell :eval never
 >>> ADD B
 #+end_src
 #+begin_src shell :exports results :results output
-echo "ADD B" | python main.py -i -db temp33.json
+echo "ADD B" | python main.py -i -db /tmp/pyassm-readme-01
 #+end_src
 
 #+RESULTS:
-: A + 05H -> 5H
+: A -> 00H + 05H -> 5H
 
-#+begin_src shell
+#+begin_src shell :eval never
 >>> ADD C
 #+end_src
 #+begin_src shell :exports results :results output
-echo "ADD C" | python main.py -i -db temp33.json
+echo "ADD C" | python main.py -i -db /tmp/pyassm-readme-01
 #+end_src
 
 #+RESULTS:
-: A + 05H -> AH
+: A -> 5H + 05H -> AH
 
-#+begin_src shell
+#+begin_src shell :eval never
 >>> STA 3322H
 #+end_src
 #+begin_src shell :exports results :results output
-echo "STA 3322H" | python main.py -i -db temp33.json
+echo "STA 3322H" | python main.py -i -db /tmp/pyassm-readme-01
 #+end_src
 
 #+RESULTS:
 : 3322H -> AH
 
-#+begin_src shell
+#+begin_src shell :eval never
 >>> inspect
 #+end_src
 #+begin_src shell :exports results :results output
-echo "inspect" | python main.py -i -db temp33.json
+echo "inspect" | python main.py -i -db /tmp/pyassm-readme-01
 #+end_src
 
 #+RESULTS:
@@ -212,6 +232,12 @@ Memory:
 	0x000A: 0x2B
 	0x000B: 0x34
 	0x3322: 0xa
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
 #+end_example
 
 ** Example Command line Workflow
@@ -225,6 +251,11 @@ Memory:
 #+RESULTS:
 : B -> 05H
 : A -> 00H
+
+#+begin_src shell :exports none :results none
+# clean up
+  rm -f test.txt
+#+end_src
 
 *** The command option (=-c=)
 #+begin_src shell  :exports both :results output
@@ -241,29 +272,29 @@ Memory:
 #+RESULTS:
 : A -> 00H
 : B -> 05H
-: A + 05H -> 5H
+: A -> 00H + 05H -> 5H
 
 *** The json file db option (=-db=)
 Specifying the file db option saves the state of interpreter to a json file and restores from it every time a *8085 command* is executed.
 
 This is useful when trying to run multiple =-c= commans as a session.
 #+begin_src shell :exports both :results output
-  python main.py -db db.json -c "MVI B 05H"
+  python main.py -db /tmp/pyassm-readme-02 -c "MVI B 05H"
 #+end_src
 
 #+RESULTS:
 : B -> 05H
 
 #+begin_src shell :exports both :results output
-  python main.py -db db.json -c "MVI A 00H; ADD B"
+  python main.py -db /tmp/pyassm-readme-02 -c "MVI A 00H; ADD B"
 #+end_src
 
 #+RESULTS:
 : A -> 00H
-: A + 05H -> 5H
+: A -> 00H + 05H -> 5H
 
 #+begin_src shell :exports both :results output
-  python main.py -db db.json -c "STA 5555H; inspect"
+  python main.py -db /tmp/pyassm-readme-02 -c "STA 5555H; inspect"
 #+end_src
 
 #+RESULTS:
@@ -285,6 +316,12 @@ Memory:
 	0x000A: 0x2B
 	0x000B: 0x34
 	0x5555: 0x5
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
 #+end_example
 
 *** The plain/indirect mode option (=-i=)
@@ -303,7 +340,7 @@ It is also recommended to run in =-db= file mode for continuous session-like int
 
 #+RESULTS:
 : B -> 05H
-: A + 05H -> 5H
+: A -> 00H + 05H -> 5H
 
 *** The verbosity logging option (=-v=)
 You can customize the verbosity of logging messages by providing,
@@ -331,8 +368,8 @@ With some configuration, the interpreter can be made to work with Emacs' Org Mod
 This uses =-i= command option to write to the interpreter.
 
 Put this in your =init.el= file,
-#+begin_src emacs-lisp
-  (defcustom path-to-8085 "~/dev/8085-interpreter"
+#+begin_src emacs-lisp :eval never
+  (defcustom path-to-8085 "~/dev/8085-interpreter/"
     "Path to folder where 8085-interpreter was cloned")
 
   (defcustom org-babel-8085-command
@@ -352,7 +389,7 @@ Put this in your =init.el= file,
 
 - The =path-to-8085= should be folder where you cloned this project.
 - The =org-babel-8085-command= should be the command to run the interpreter (eg python main.py),
-  - You could use =(concat path-to-8085 ".venv/bin/python")= in place of "=python="  if you use in-project virtual environments.
+  - You could use =(concat path-to-8085 "/.venv/bin/python")= in place of "=python="  if you use in-project virtual environments.
 
 Save and restart your emacs (or execute each block with =C-x C-e=).
 Then you can use org mode to write block like:

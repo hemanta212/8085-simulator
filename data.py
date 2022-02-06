@@ -56,7 +56,7 @@ COMMANDS = {
         "function": "load_register_pair_immediate",
         "parameters": {
             "register_pair": REGISTER_PAIRS,
-            "value": "word",
+            "address": "word",
         },
     },
     "LDA": {
