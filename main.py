@@ -2,6 +2,7 @@
 An 8085 interpreter written in Python.
 """
 import sys
+import readline
 from typing import Optional
 
 from loguru import logger
@@ -11,7 +12,12 @@ from state_model import State
 from interpreter import Interpreter
 from data import COMMANDS
 from messages import msg_welcome, msg_help
-from converter import process_instruction_args, is_label, process_cmd_line_args
+from converter import (
+    process_instruction_args,
+    is_label,
+    process_cmd_line_args,
+    process_comments,
+)
 
 
 def main(commands: tuple = tuple(), file_db: str = "", indirect_mode: bool = False):
@@ -26,6 +32,7 @@ def main(commands: tuple = tuple(), file_db: str = "", indirect_mode: bool = Fal
             try:
                 command = input(">>> ") if not indirect_mode else input("")
                 process_command(command, interpreter, file_db)
+                readline.add_history(command)
             except EOFError:
                 return
 
@@ -43,6 +50,8 @@ def process_command(command: str, interpreter: Interpreter, file_db: str):
         exit(0)
     elif command == "inspect":
         interpreter.state.inspect()
+    elif command.strip() == "":
+        return
     else:
         cmd = cmd_preprocessor(command, interpreter.state)
         if cmd and cmd.is_valid:
@@ -57,10 +66,23 @@ def cmd_preprocessor(cmd: str, state: State) -> Optional[Command]:
     """
     cmd_list = tuple([item.strip() for item in cmd.split(" ") if item])
     logger.debug(f"Splitted commands: {cmd_list}")
+
+    # Preproces comments
+    cmd_list = process_comments(cmd_list)
+    if not cmd_list:
+        logger.debug(f"Statements composed of solely of comments, ending evaluation.")
+        return
+
+    # Preproces labels
     label = ""
     if is_label(cmd_list[0]):
         label = cmd_list[0][:-1]
         cmd_list = cmd_list[1:]
+
+    if not cmd_list:
+        logger.error(f"Command incomplete: only found label '{label}:'")
+        return
+
     first, second = 0, 1
     cmdname, cmdargs = cmd_list[first], cmd_list[second:]
     if cmdname not in COMMANDS:

@@ -58,6 +58,10 @@ class Command:
     def inspect(self) -> None:
         self.state.inspect()
 
+    def halt(self, args: tuple) -> None:
+        logger.debug("HLT received.")
+        return
+
     def move(self, args: tuple) -> None:
         """
         Move value from register to register
@@ -76,9 +80,10 @@ class Command:
         logger.debug(f"MVI: {args}")
         register = args[0]
         value = args[1]
-        self.state.registers[register] = value
+        formatted_value = f"0x{int(value, 16):02x}"
+        self.state.registers[register] = formatted_value
         logger.debug("MOVED TO IMMEDIATE:" f"{self.state.registers[register]=}")
-        print(f"{register} -> {hex_to_simple(value)}")
+        print(f"{register} -> {hex_to_simple(formatted_value)}")
 
     def load_accumulator(self, args: tuple):
         """
@@ -87,6 +92,7 @@ class Command:
         logger.debug(f"LDA: {args}")
         # convert to string representation for dict key
         address = args[0]
+        address = f"0x{int(address, 16):04x}"
         if not self.state.memory.get(address):
             logger.debug(
                 f"Address {address} is not in memory:",
@@ -106,6 +112,7 @@ class Command:
         """
         logger.debug(f"STA: {args}")
         address = args[0]
+        address = f"0x{int(address, 16):04x}"
         self.state.memory[address] = self.state.accumulator
         logger.debug(
             "STORED ACCUMULATOR:",
@@ -147,24 +154,66 @@ class Command:
         Subtract a 8-bit number from accumulator
         """
         logger.debug(f"Sub Immediate: {args}")
+        acc_value = self.state.accumulator  # for logging only
+        result = self.__compare_sub_immediate(args)
+        self.state.accumulator = result
+
         value = args[0]
-        acc_value = self.state.accumulator
-        operation_value = int(acc_value, 16) - int(value, 16)
-
-        if operation_value < 0:
-            self.change_state_flags(carry=True, sign=True, zero=False)
-        elif operation_value > 0:
-            self.change_state_flags(carry=False, sign=False, zero=False)
-        elif operation_value == 0:
-            self.change_state_flags(carry=False, sign=False, zero=True)
-
-        self.state.accumulator = hex(abs(operation_value))
-
         logger.debug(
             f"Subtracted '{value}' from '{acc_value}': {self.state.accumulator}"
         )
         print(
             f"A -> {hex_to_simple(acc_value)} - {hex_to_simple(value)} -> {hex_to_simple(self.state.accumulator)}\n"
+            f"FLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
+        )
+
+    def subtract(self, args: tuple) -> None:
+        """
+        Subtract a register from accumulator
+        """
+        logger.debug(f"Sub Immediate: {args}")
+        acc_value = self.state.accumulator
+        register = args[0]
+        register_value = self.state.registers[register]
+        result = self.__compare_sub_immediate((register_value,))
+        self.state.accumulator = result
+
+        logger.debug(
+            f"Subtracted '{register_value}' from '{acc_value}': {self.state.accumulator}"
+        )
+        print(
+            f"A - {register} -> {hex_to_simple(acc_value)} - {hex_to_simple(register_value)} -> {hex_to_simple(self.state.accumulator)}\n"
+            f"FLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
+        )
+
+    def compare_immediate(self, args: tuple) -> None:
+        """
+        Compare a 8-bit number from accumulator
+        """
+        logger.debug(f"Sub Immediate: {args}")
+        value = args[0]
+        acc_value = self.state.accumulator
+
+        result = self.__compare_sub_immediate(args)
+        logger.debug(f"Compared '{value}' from '{acc_value}': {result}")
+        print(
+            f"[A] {hex_to_simple(acc_value)} - {hex_to_simple(value)} -> {hex_to_simple(result)}\n"
+            f"FLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
+        )
+
+    def compare(self, args: tuple) -> None:
+        """
+        Subtract a register from accumulator
+        """
+        logger.debug(f"Sub Immediate: {args}")
+        register = args[0]
+        register_value = self.state.registers[register]
+        acc_value = self.state.accumulator
+
+        result = self.__compare_sub_immediate((register_value,))
+        logger.debug(f"Compared '{register_value}' from '{acc_value}': {result}")
+        print(
+            f"A - {register} -> {hex_to_simple(acc_value)} - {hex_to_simple(register_value)} -> {hex_to_simple(result)}\n"
             f"FLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
         )
 
@@ -204,6 +253,44 @@ class Command:
             f"{register} -> {hex_to_simple(register_value)} - {hex_to_simple(decrement_by)} -> {hex_to_simple(decremented_value)}"
         )
 
+    def increment_extended_register(self, args: tuple):
+        """
+        Increment the xtended register pair by 1
+        """
+        logger.debug(f"INX: {args}")
+        register = args[0]
+        REG1, REG2 = REGISTER_PAIRS[register]
+        register_addr = self.state.get_mem_addr_register_pair(register)
+        logger.debug(
+            f"Got mem addr stored by register pair {REG1}{REG2}: {register_addr}"
+        )
+        increment_by = hex(0x1)
+        incremented_int_value = int(register_addr, 16) + int(increment_by, 16)
+        incremented_value = f"0x{incremented_int_value:04x}"
+        self.state.set_register_pair_value(incremented_value, register)
+        hex1, hex2 = self.state.registers[REG1], self.state.registers[REG2]
+        logger.debug(f"{REG1} -> {hex1} | {REG2} -> {hex2}")
+        print(f"{REG1}{REG2} -> {incremented_value} [{register_addr} + {increment_by}]")
+
+    def decrement_extended_register(self, args: tuple) -> None:
+        """
+        Decrement the xtended register pair by 1
+        """
+        logger.debug(f"DCX: {args}")
+        register = args[0]
+        REG1, REG2 = REGISTER_PAIRS[register]
+        register_addr = self.state.get_mem_addr_register_pair(register)
+        logger.debug(
+            f"Got mem addr stored by register pair {REG1}{REG2}: {register_addr}"
+        )
+        decrement_by = hex(0x1)
+        decremented_int_value = int(register_addr, 16) - int(decrement_by, 16)
+        decremented_value = f"0x{decremented_int_value:04x}"
+        self.state.set_register_pair_value(decremented_value, register)
+        hex1, hex2 = self.state.registers[REG1], self.state.registers[REG2]
+        logger.debug(f"{REG1} -> {hex1} | {REG2} -> {hex2}")
+        print(f"{REG1}{REG2} -> {decremented_value} [{register_addr} - {decrement_by}]")
+
     def load_register_pair_immediate(self, args: tuple) -> None:
         """
         Load register pair from immediate
@@ -213,7 +300,7 @@ class Command:
         self.state.set_register_pair_value(value, register)
         REG1, REG2 = REGISTER_PAIRS[register]
         hex1, hex2 = self.state.registers[REG1], self.state.registers[REG2]
-        print(f"{REG1} -> {hex1}\n{REG2} -> {hex2}")
+        print(f"{REG1}{REG2} -> {value} [{REG1} -> {hex1} {REG2} -> {hex2}]")
 
     def load_accumulator_from_register_pair(self, args: tuple) -> None:
         """
@@ -228,7 +315,7 @@ class Command:
         logger.debug(f"LOADED ACCUMULATOR: {self.state.accumulator}")
         print(
             f"A -> {hex_to_simple(self.state.accumulator)}",
-            f"\nFROM {REG1}{REG2} -> [{hex1}{hex2[2:]}]",
+            f" ; FROM {REG1}{REG2} -> [{hex1}{hex2[2:]}]",
         )
 
     def jump_if_zero(self, args: tuple) -> Optional[str]:
@@ -275,6 +362,15 @@ class Command:
         if not self.state.flags["carry"]:
             return label[:-1]
 
+    def out(self, args: tuple) -> None:
+        """
+        Display the vaue of accumulator to display port
+        """
+        logger.debug(f"OUT: {args}")
+        port = args[0]
+        acc_value = self.state.accumulator
+        print(f"{port}: {hex_to_simple(acc_value)}")
+
     def change_state_flags(self, **kwargs) -> None:
         """
         Helper function to set state flags in one simple call
@@ -285,6 +381,22 @@ class Command:
                     f"No such flag '{key}' present at state flags {self.state.flags}"
                 )
             self.state.flags[key] = value
+
+    def __compare_sub_immediate(self, args: tuple) -> str:
+        """
+        Variation of compare immediate that changes flags and returns value
+        Utilization or reuse for subtraction and comparison
+        """
+        value = args[0]
+        acc_value = self.state.accumulator
+        operation_value = int(acc_value, 16) - int(value, 16)
+        if operation_value < 0:
+            self.change_state_flags(carry=True, sign=True, zero=False)
+        elif operation_value > 0:
+            self.change_state_flags(carry=False, sign=False, zero=False)
+        elif operation_value == 0:
+            self.change_state_flags(carry=False, sign=False, zero=True)
+        return hex(abs(operation_value))
 
     def __str__(self):
         label = f"{self.label}: " if self.label else ""

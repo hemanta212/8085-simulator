@@ -124,6 +124,8 @@ class Interpreter:
         Wrapper to command.eval function to interpret its return value.
         It then sets value of command_pointer, waiting_label and is_execution_suspended.
         """
+        if command.label:
+            print(f"\n\t{command.label}:")
         label = command.eval()
         logger.debug(f"Command '{command}' evaluation complete. Got '{label=}'")
         if not label:

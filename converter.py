@@ -57,6 +57,30 @@ def process_hex(argument: str) -> str:
     return hex_code
 
 
+def process_comments(cmd_list: tuple) -> tuple:
+    """
+    Iterates through the list and if ';' found discard ';' and all items after ';'
+    """
+    logger.debug(f"Processing comments: Got {cmd_list}")
+    new_cmd_list = []
+    for token in cmd_list:
+        if token == ";":
+            logger.debug(f"Processed comments: {new_cmd_list}")
+            return tuple(new_cmd_list)
+        elif ";" in token:
+            # example case: MVI A 01H;comment -> split at ; and put first item to cmd and throw others
+            token_parts = token.split(";")
+            if token_parts[0].strip():
+                # for cases like 01H ;comments splitting at ; gives first item as ''
+                new_cmd_list.append(token_parts[0].strip())
+            logger.debug(f"Processed comments: {new_cmd_list}")
+            return tuple(new_cmd_list)
+        else:
+            new_cmd_list.append(token)
+    logger.debug(f"No comments found: {new_cmd_list}")
+    return tuple(new_cmd_list)
+
+
 def process_c_mode_args(args: tuple) -> tuple:
     cmd = " ".join(args)
     cmds = [i.strip() for i in cmd.split(";")]

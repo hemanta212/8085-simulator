@@ -37,7 +37,9 @@ Type =help= and run the commands listed.
 - [x] - Implement Flags (CY, Z, S)
 - [x] - Implement labels and jumps (Loops) [Commands: JC, JNC, JZ, JNZ)
 - [x] - Implement increment/decrements [INR, DCR]
-- [ ] - Implement  Xtended increment/decrements [INX, DCX]
+- [x] - Implement  Xtended increment/decrements [INX, DCX]
+- [x] - Implement basic commands (CMP/CPI, OUT)
+- [x] - Implement comments, empty lines, HLT(no-effect)
 - [ ] - ... ( a lot of commands)
 - [ ] - Implement proper 8-bit 16-bit type system and validation
 - [ ] - Implement a stacktrace in case of errors
@@ -73,13 +75,19 @@ LDA - Load accumulator
 STA - Store accumulator
 HLT - Halt
 ADD - Add
+SUB - Subtract
 ADI - Add Immediate
 SUI - Subtract Immediate
+CMP - Compare
+CPI - Compare Immediate
 LDAX - Load accumulator from register pair
+INX - Incremented xtended register pairs
+DCX - Decrement xtended register pairs
 JZ - Jump If Zero
 JNZ - Jump If Not Zero
 JC - Jump If Carry
 JNC - Jump If Not Carry
+OUT - Out
 #+end_example
 
 ** Command line arguments
@@ -185,7 +193,7 @@ echo "ADD B" | python main.py -i -db /tmp/pyassm-readme-01
 #+end_src
 
 #+RESULTS:
-: A -> 00H + 05H -> 5H
+: A -> 00H + 05H -> 05H
 
 #+begin_src shell :eval never
 >>> ADD C
@@ -195,7 +203,7 @@ echo "ADD C" | python main.py -i -db /tmp/pyassm-readme-01
 #+end_src
 
 #+RESULTS:
-: A -> 5H + 05H -> AH
+: A -> 05H + 05H -> 0AH
 
 #+begin_src shell :eval never
 >>> STA 3322H
@@ -205,7 +213,7 @@ echo "STA 3322H" | python main.py -i -db /tmp/pyassm-readme-01
 #+end_src
 
 #+RESULTS:
-: 3322H -> AH
+: 3322H -> 0AH
 
 #+begin_src shell :eval never
 >>> inspect
@@ -217,7 +225,7 @@ echo "inspect" | python main.py -i -db /tmp/pyassm-readme-01
 #+RESULTS:
 #+begin_example
 Registers:
-	A: 0xa
+	A: 0x0a
 	B: 0x05
 	C: 0x05
 	D: 0x00
@@ -231,7 +239,7 @@ Memory:
 	0x0001: 0x9A
 	0x000A: 0x2B
 	0x000B: 0x34
-	0x3322: 0xa
+	0x3322: 0x0a
 
 Flags:
 	carry: 0
@@ -272,7 +280,7 @@ Flags:
 #+RESULTS:
 : A -> 00H
 : B -> 05H
-: A -> 00H + 05H -> 5H
+: A -> 00H + 05H -> 05H
 
 *** The json file db option (=-db=)
 Specifying the file db option saves the state of interpreter to a json file and restores from it every time a *8085 command* is executed.
@@ -291,7 +299,7 @@ This is useful when trying to run multiple =-c= commans as a session.
 
 #+RESULTS:
 : A -> 00H
-: A -> 00H + 05H -> 5H
+: A -> 00H + 05H -> 05H
 
 #+begin_src shell :exports both :results output
   python main.py -db /tmp/pyassm-readme-02 -c "STA 5555H; inspect"
@@ -299,9 +307,9 @@ This is useful when trying to run multiple =-c= commans as a session.
 
 #+RESULTS:
 #+begin_example
-5555H -> 5H
+5555H -> 05H
 Registers:
-	A: 0x5
+	A: 0x05
 	B: 0x05
 	C: 0x00
 	D: 0x00
@@ -315,7 +323,7 @@ Memory:
 	0x0001: 0x9A
 	0x000A: 0x2B
 	0x000B: 0x34
-	0x5555: 0x5
+	0x5555: 0x05
 
 Flags:
 	carry: 0
@@ -340,7 +348,7 @@ It is also recommended to run in =-db= file mode for continuous session-like int
 
 #+RESULTS:
 : B -> 05H
-: A -> 00H + 05H -> 5H
+: A -> 00H + 05H -> 05H
 
 *** The verbosity logging option (=-v=)
 You can customize the verbosity of logging messages by providing,

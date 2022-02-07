@@ -42,18 +42,27 @@ class State:
             "sign": False,
         }
 
+    def get_mem_addr_register_pair(self, register: str) -> str:
+        """
+        Gets the 16-bit memory adress combinely stored by an extended register pairs
+
+        reg1 = 0x33, reg2 = 0x44 -> mem_addr = 0x3344
+        """
+        # let REG1->0x33, REG2->0x44
+        REG1, REG2 = REGISTER_PAIRS[register]
+        # 0x44 -> 44
+        reg2_val = self.registers[REG2][2:]
+        # 0x33 + '44' -> 0x3344
+        mem_addr = self.registers[REG1] + reg2_val
+        return mem_addr
+
     def get_register_pair_value(self, register: str) -> str:
         """
         From a register pair storing memory address, grabs the value store in the mem addr
 
         reg1 = 0x33, reg2 = 0x44 -> mem_addr = 0x3344 -> value at that addr
         """
-        # 0x33, 0x44
-        REG1, REG2 = REGISTER_PAIRS[register]
-        # 0x44 -> 44
-        reg2_val = self.registers[REG2][2:]
-        # 0x33 + '44' -> 0x3344
-        mem_addr = self.registers[REG1] + reg2_val
+        mem_addr = self.get_mem_addr_register_pair(register)
         # check for addr at memory if no such addr return '0x00' by default
         value_at_mem_addr = self.memory.get(mem_addr, "0x00")
         logger.debug(f"Loaded {value_at_mem_addr} from {mem_addr}")
@@ -84,14 +93,17 @@ class State:
         """
         Get the value of the accumulator.
         """
-        return self.registers["A"]
+        value = self.registers["A"]
+        formatted_value = f"0x{int(value, 16):02x}"
+        return formatted_value
 
     @accumulator.setter
     def accumulator(self, value: str) -> None:
         """
         Set the value of the accumulator.
         """
-        self.registers["A"] = value
+        formatted_value = f"0x{int(value, 16):02x}"
+        self.registers["A"] = formatted_value
 
     def inspect(self) -> None:
         """
