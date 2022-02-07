@@ -1,8 +1,11 @@
 * 8085-Python
-Clone and run this repository,
+A simple exploratory interpreter with REPL experience.
+
+- For windows users, you can download and run the =.exe= file  from [[https://github.com/hemanta212/releases/latest][releases page]].
+- Clone and run this repository,
 #+begin_src shell :eval never
   git clone https://github.com/hemanta212/8085-simulator
-  python -m pip install loguru rich
+  python -m pip install loguru rich pyreadline
   cd 8085-simulator
   python main.py
 #+end_src
@@ -29,7 +32,6 @@ Type =help= and run the commands listed.
 :END:
 
 ** Features
-
 - [x] - Implement Registers and Memory
 - [x] - Implement Basic commands (ADD, ADI, SUB, SUI, MOV, MVI, STA, LDA)
 - [x] - Implement Xtended Register Pairs (LXI, M, LDAX)
@@ -40,6 +42,7 @@ Type =help= and run the commands listed.
 - [x] - Implement  Xtended increment/decrements [INX, DCX]
 - [x] - Implement basic commands (CMP/CPI, OUT)
 - [x] - Implement comments, empty lines, HLT(no-effect)
+- [x] - Release a pyinstaller executable
 - [ ] - ... ( a lot of commands)
 - [ ] - Implement proper 8-bit 16-bit type system and validation
 - [ ] - Implement a stacktrace in case of errors
