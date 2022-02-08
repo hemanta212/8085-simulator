@@ -412,19 +412,19 @@ Put this in your =init.el= file,
 
 *** Emacs 8085 major mode
 #+begin_src emacs-lisp :eval never
-  ;; Optional Emacs major mode
     (require 'rx)
     (defvar 8085-mode-map
       (let ((map (make-sparse-keymap)))
         map))
 
-    (defconst 8085--font-lock-defaults
-    (let ((instructions '("MVI" "MOV" "ADD" "SUB" "ADI" "SUI" "JNZ" "JNC" "JZ" "JC" "LXI" "LXAD" "INR" "DCR" "INX" "DCX" "OUT" "HLT" "CPI" "CMP" "STA" "LDA"))
-          (registers '(" A " " B " " C " " D " " E " " M ")))
+  (defconst 8085--font-lock-defaults
+    (let (
+          (instructions '("MVI" "MOV" "ADD" "SUB" "ADI"
+                          "SUI" "JNZ" "JNC" "JZ" "JC" "LXI"
+                          "LXAD" "INR" "DCR" "INX" "DCX" "OUT"
+                          "HLT" "CPI" "CMP" "STA" "LDA")))
       `(((,(rx-to-string `(: (or ,@instructions))) 0 font-lock-keyword-face)
-         ("\\([[:word:]]+\\):" 1 font-lock-function-name-face)
-         ;(,(rx-to-string `(: (or ,@registers))) 0 font-lock-type-face)
-         ))))
+      ("\\([[:word:]]+\\):" 1 font-lock-function-name-face)))))
 
     (defvar 8085-mode-syntax-table
     (let ((st (make-syntax-table)))
