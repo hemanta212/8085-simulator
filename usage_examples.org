@@ -16,10 +16,9 @@
   - [[#dcr][DCR]]
   - [[#out][OUT]]
   - [[#lxi][LXI]]
-  - [[#flags][Flags]]
   - [[#inxdcx][INX/DCX]]
   - [[#ldax][LDAX]]
-- [[#problems][Problems]]
+- [[#practice-problems][Practice Problems]]
   - [[#register-setup-from-1260-to-1264][Register setup from 1260 to 1264]]
   - [[#simple][SIMPLE]]
   - [[#memory-dynamic][Memory dynamic]]
@@ -327,14 +326,6 @@ Flags:
 	sign: 0
 #+end_example
 
-** Flags
-Flags are one bit stuff that stores the status of *lastest* execution
-| flags |   |
-| Z     |   |
-| C     |   |
-| aux c |   |
-| par   |   |
-
 ** INX/DCX
 #+begin_src 8085 :args -db /tmp/8085-session1 :exports both
   LXI H 1260
@@ -359,7 +350,7 @@ LDAX D ; It puts that value to A
 : DE -> 0x1260 [D -> 0x12 E -> 0x60]
 : A -> 05H  ; FROM DE -> [0x1260]
 
-* Problems
+* Practice Problems
 ** Register setup from 1260 to 1264
 #+begin_src 8085 :args -db /tmp/8085-session1 :exports both
   MVI A 05
