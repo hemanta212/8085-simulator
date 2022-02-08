@@ -98,7 +98,7 @@ class Command:
                 f"Address {address} is not in memory:",
                 f"Creating and init to 0",
             )
-            self.state.memory[address] = hex(0x00)
+            self.state.memory[address] = f"0x{0:02x}"
         self.state.accumulator = self.state.memory[address]
         logger.debug(f"LOADED ACCUMULATOR: {self.state.accumulator}")
         print(
@@ -224,9 +224,10 @@ class Command:
         logger.debug(f"INR: {args}")
         register = args[0]
         register_value = self.state.registers[register]
-        increment_by = hex(0x1)
-        incremented_value = hex(int(register_value, 16) + int(increment_by, 16))
-        self.state.registers[register] = incremented_value
+        increment_by = f"0x{1:02x}"
+        incremented_int_value = int(register_value, 16) + int(increment_by, 16)
+        self.state.registers[register] = hex(abs(incremented_int_value))
+        incremented_value = self.state.registers[register]
         logger.debug(f"Incremented: {register} to {incremented_value}")
         print(
             f"{register} -> {hex_to_simple(register_value)} + {hex_to_simple(increment_by)} -> {hex_to_simple(incremented_value)}"
@@ -239,15 +240,16 @@ class Command:
         logger.debug(f"DCR: {args}")
         register = args[0]
         register_value = self.state.registers[register]
-        decrement_by = hex(0x1)
-        decremented_value = hex(int(register_value, 16) - int(decrement_by, 16))
-        self.state.registers[register] = decremented_value
-        if int(decremented_value, 16) < 0:
+        decrement_by = f"0x{1:02x}"  # eq to hex(0x01)
+        decremented_int_value = int(register_value, 16) - int(decrement_by, 16)
+        if decremented_int_value < 0:
             self.change_state_flags(carry=True, sign=True, zero=False)
-        elif int(decremented_value, 16) > 0:
+        elif decremented_int_value > 0:
             self.change_state_flags(carry=False, sign=False, zero=False)
-        elif int(decremented_value, 16) == 0:
+        elif decremented_int_value == 0:
             self.change_state_flags(carry=False, sign=False, zero=True)
+        self.state.registers[register] = hex(abs(decremented_int_value))
+        decremented_value = self.state.registers[register]
         logger.debug(f"Decremented: {register} to {decremented_value}")
         print(
             f"{register} -> {hex_to_simple(register_value)} - {hex_to_simple(decrement_by)} -> {hex_to_simple(decremented_value)}"
@@ -264,7 +266,7 @@ class Command:
         logger.debug(
             f"Got mem addr stored by register pair {REG1}{REG2}: {register_addr}"
         )
-        increment_by = hex(0x1)
+        increment_by = f"0x{1:02x}"
         incremented_int_value = int(register_addr, 16) + int(increment_by, 16)
         incremented_value = f"0x{incremented_int_value:04x}"
         self.state.set_register_pair_value(incremented_value, register)
@@ -283,8 +285,13 @@ class Command:
         logger.debug(
             f"Got mem addr stored by register pair {REG1}{REG2}: {register_addr}"
         )
-        decrement_by = hex(0x1)
+        decrement_by = f"0x{1:02x}"
         decremented_int_value = int(register_addr, 16) - int(decrement_by, 16)
+        if decremented_int_value < 0:
+            logger.error(
+                f"Memory address '{register_addr}' gets negative when decremented"
+            )
+            return
         decremented_value = f"0x{decremented_int_value:04x}"
         self.state.set_register_pair_value(decremented_value, register)
         hex1, hex2 = self.state.registers[REG1], self.state.registers[REG2]
@@ -297,6 +304,7 @@ class Command:
         """
         logger.debug(f"LXI: {args}")
         register, value = args[0], args[1]
+        value = f"0x{int(value, 16):04x}"
         self.state.set_register_pair_value(value, register)
         REG1, REG2 = REGISTER_PAIRS[register]
         hex1, hex2 = self.state.registers[REG1], self.state.registers[REG2]

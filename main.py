@@ -64,6 +64,9 @@ def cmd_preprocessor(cmd: str, state: State) -> Optional[Command]:
     """
     Convert tokens to types, Return a Command object.
     """
+    # Preproces commas to space
+    cmd = cmd.replace(",", " ")
+
     cmd_list = tuple([item.strip() for item in cmd.split(" ") if item])
     logger.debug(f"Splitted commands: {cmd_list}")
 

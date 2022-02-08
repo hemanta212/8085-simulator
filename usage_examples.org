@@ -1,0 +1,596 @@
+* Table of contents
+:PROPERTIES:
+:TOC:      :include siblings :depth 2
+:END:
+:CONTENTS:
+- [[#table-of-contents][Table of contents]]
+- [[#commands][Commands]]
+  - [[#mov][MOV]]
+  - [[#mvi][MVI]]
+  - [[#addadi][ADD/ADI]]
+  - [[#subsui][SUB/SUI]]
+  - [[#cmpcpi][CMP/CPI]]
+  - [[#sta][STA]]
+  - [[#lda][LDA]]
+  - [[#inr][INR]]
+  - [[#dcr][DCR]]
+  - [[#out][OUT]]
+  - [[#lxi][LXI]]
+  - [[#inxdcx][INX/DCX]]
+  - [[#ldax][LDAX]]
+- [[#practice-problems][Practice Problems]]
+  - [[#register-setup-from-1260-to-1264][Register setup from 1260 to 1264]]
+  - [[#simple][SIMPLE]]
+  - [[#memory-dynamic][Memory dynamic]]
+:END:
+
+* Commands
+#+begin_src shell :exports none
+rm -rf /tmp/8085-session1
+#+end_src
+
+#+RESULTS:
+
+** MOV
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x00
+	B: 0x00
+	C: 0x00
+	D: 0x00
+	E: 0x00
+	H: 0x00
+	L: 0x00
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+** MVI
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+  MVI A 03H
+#+end_src
+
+#+RESULTS:
+: A -> 03H
+
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+  inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x03
+	B: 0x00
+	C: 0x00
+	D: 0x00
+	E: 0x00
+	H: 0x00
+	L: 0x00
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+  MOV B A
+  MOV C A
+#+end_src
+
+#+RESULTS:
+: B -> 03H [From A]
+: C -> 03H [From A]
+
+** ADD/ADI
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x03
+	B: 0x03
+	C: 0x03
+	D: 0x00
+	E: 0x00
+	H: 0x00
+	L: 0x00
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+ADD B
+#+end_src
+
+#+RESULTS:
+: A -> 03H + 03H -> 06H
+
+** SUB/SUI
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+  SUB B
+  SUI 04
+  MVI A 06
+#+end_src
+
+#+RESULTS:
+: A - B -> 06H - 03H -> 03H
+: FLAGS: CY->0, S->0, Z->0
+: A -> 03H - 04H -> 01H
+: FLAGS: CY->1, S->1, Z->0
+: A -> 06H
+
+** CMP/CPI
+CMP B
+CPI 05
+
+- A > B, no carry
+- A < B : carry
+- A == B : no carry, zero flag
+
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+CMP B
+CPI 07
+#+end_src
+
+#+RESULTS:
+: A - B -> 06H - 03H -> 3H
+: FLAGS: CY->0, S->0, Z->0
+: [A] 06H - 07H -> 1H
+: FLAGS: CY->1, S->1, Z->0
+
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+  MVI C 07
+  CMP C
+  CPI 02H
+#+end_src
+
+#+RESULTS:
+: C -> 07H
+: A - C -> 06H - 07H -> 1H
+: FLAGS: CY->1, S->1, Z->0
+: [A] 06H - 02H -> 4H
+: FLAGS: CY->0, S->0, Z->0
+
+** STA
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x06
+	B: 0x03
+	C: 0x07
+	D: 0x00
+	E: 0x00
+	H: 0x00
+	L: 0x00
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+STA 3344H
+#+end_src
+
+#+RESULTS:
+: 3344H -> 06H
+
+** LDA
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+  inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x06
+	B: 0x03
+	C: 0x07
+	D: 0x00
+	E: 0x00
+	H: 0x00
+	L: 0x00
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x3344: 0x06
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+LDA 0001H
+#+end_src
+
+#+RESULTS:
+: A -> 00H [From 0001H]
+
+** INR
+Increment Register
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+INR A
+#+end_src
+
+#+RESULTS:
+: A -> 00H + 01H -> 01H
+
+** DCR
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+DCR B
+#+end_src
+
+#+RESULTS:
+: B -> 03H - 01H -> 02H
+
+** OUT
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+OUT PORT0
+OUT PORT1
+#+end_src
+
+#+RESULTS:
+: PORT0: 01H
+: PORT1: 01H
+
+** LXI
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+LXI H 3344H
+#+end_src
+
+#+RESULTS:
+: HL -> 0x3344 [H -> 0x33 L -> 0x44]
+
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x01
+	B: 0x02
+	C: 0x07
+	D: 0x00
+	E: 0x00
+	H: 0x33
+	L: 0x44
+	M: 0x06
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x3344: 0x06
+	0x0001: 0x00
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+** INX/DCX
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+  LXI H 1260
+  INX H
+  DCX H
+#+end_src
+
+#+RESULTS:
+: HL -> 0x1260 [H -> 0x12 L -> 0x60]
+: HL -> 0x1261 [0x1260 + 0x01]
+: HL -> 0x1260 [0x1261 - 0x01]
+
+** LDAX
+We refer to M for the value/data stored in xtended HL register
+For other we have to manually load the value to Accumulator
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+LXI D 1260H ; [1260H] contains value 05A
+LDAX D ; It puts that value to A
+#+end_src
+
+#+RESULTS:
+: DE -> 0x1260 [D -> 0x12 E -> 0x60]
+: A -> 05H  ; FROM DE -> [0x1260]
+
+* Practice Problems
+** Register setup from 1260 to 1264
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+  MVI A 05
+  STA 1260H
+  MVI A 01
+  STA 1261H
+  MVI A 02
+  STA 1262H
+  MVI A 03
+  STA 1263H
+  MVI A 04
+  STA 1264H
+#+end_src
+
+#+RESULTS:
+#+begin_example
+A -> 05H
+1260H -> 05H
+A -> 01H
+1261H -> 01H
+A -> 02H
+1262H -> 02H
+A -> 03H
+1263H -> 03H
+A -> 04H
+1264H -> 04H
+#+end_example
+
+** SIMPLE
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x04
+	B: 0x02
+	C: 0x07
+	D: 0x00
+	E: 0x00
+	H: 0x33
+	L: 0x44
+	M: 0x06
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x3344: 0x06
+	0x0001: 0x00
+	0x1260: 0x05
+	0x1261: 0x01
+	0x1262: 0x02
+	0x1263: 0x03
+	0x1264: 0x04
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+  MVI A 00H ; A = 00H
+  MVI B 05H ; B = 05H
+
+  FIRST: ADI 01 ; A + 1
+         DCR B ; B -1
+         JNZ FIRST
+         HLT
+  #+end_src
+
+  #+RESULTS:
+  #+begin_example
+  A -> 00H
+  B -> 05H
+
+          FIRST:
+  A -> 00H + 01H -> 01H
+  B -> 05H - 01H -> 04H
+
+          FIRST:
+  A -> 01H + 01H -> 02H
+  B -> 04H - 01H -> 03H
+
+          FIRST:
+  A -> 02H + 01H -> 03H
+  B -> 03H - 01H -> 02H
+
+          FIRST:
+  A -> 03H + 01H -> 04H
+  B -> 02H - 01H -> 01H
+
+          FIRST:
+  A -> 04H + 01H -> 05H
+  B -> 01H - 01H -> 00H
+  #+end_example
+
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+  inspect
+  #+end_src
+
+  #+RESULTS:
+  #+begin_example
+  Registers:
+          A: 0x05
+          B: 0x00
+          C: 0x07
+          D: 0x00
+          E: 0x00
+          H: 0x33
+          L: 0x44
+          M: 0x06
+
+  Memory:
+          0x1000: 0x2b
+          0x1001: 0x34
+          0x0000: 0x00
+          0x3344: 0x06
+          0x0001: 0x00
+          0x1260: 0x05
+          0x1261: 0x01
+          0x1262: 0x02
+          0x1263: 0x03
+          0x1264: 0x04
+
+  Flags:
+          carry: 0
+          auxillary_carry: 0
+          zero: 0
+          sign: 0
+  #+end_example
+
+** Memory dynamic
+- Wap to add five bytes of memory and store it in some other memory
+  #+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+  MVI A 00H
+  MVI B 05H
+  LXI H 1260H
+
+  FIRST: ADD M
+         INX H
+         DCR B
+         JNZ FIRST
+         HLT
+  #+end_src
+
+  #+RESULTS:
+  #+begin_example
+  A -> 00H
+  B -> 05H
+  HL -> 0x1260 [H -> 0x12 L -> 0x60]
+
+          FIRST:
+  A -> 00H + 05H -> 05H
+  HL -> 0x1261 [0x1260 + 0x01]
+  B -> 05H - 01H -> 04H
+
+          FIRST:
+  A -> 05H + 01H -> 06H
+  HL -> 0x1262 [0x1261 + 0x01]
+  B -> 04H - 01H -> 03H
+
+          FIRST:
+  A -> 06H + 02H -> 08H
+  HL -> 0x1263 [0x1262 + 0x01]
+  B -> 03H - 01H -> 02H
+
+          FIRST:
+  A -> 08H + 03H -> 0BH
+  HL -> 0x1264 [0x1263 + 0x01]
+  B -> 02H - 01H -> 01H
+
+          FIRST:
+  A -> 0BH + 04H -> 0FH
+  HL -> 0x1265 [0x1264 + 0x01]
+  B -> 01H - 01H -> 00H
+  #+end_example
+
+- Wap to add five bytes of memory and store it in some other memory
+  #+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+    MVI B 04H
+    LXI H 1260H
+    MOV C M
+    LXI H 1261H
+
+    FIRST: MOV A M
+           CMP C
+           JNC SECOND
+           MOV C A
+
+    SECOND: INX H
+            DCR B
+            JNZ FIRST
+            HLT
+  #+end_src
+
+  #+RESULTS:
+  #+begin_example
+  B -> 04H
+  HL -> 0x1260 [H -> 0x12 L -> 0x60]
+  C -> 05H [From M]
+  HL -> 0x1261 [H -> 0x12 L -> 0x61]
+
+          FIRST:
+  A -> 01H [From M]
+  A - C -> 01H - 05H -> 4H
+  FLAGS: CY->1, S->1, Z->0
+  C -> 01H [From A]
+
+          SECOND:
+  HL -> 0x1262 [0x1261 + 0x01]
+  B -> 04H - 01H -> 03H
+
+          FIRST:
+  A -> 02H [From M]
+  A - C -> 02H - 01H -> 1H
+  FLAGS: CY->0, S->0, Z->0
+
+          SECOND:
+  HL -> 0x1263 [0x1262 + 0x01]
+  B -> 03H - 01H -> 02H
+
+          FIRST:
+  A -> 03H [From M]
+  A - C -> 03H - 01H -> 2H
+  FLAGS: CY->0, S->0, Z->0
+
+          SECOND:
+  HL -> 0x1264 [0x1263 + 0x01]
+  B -> 02H - 01H -> 01H
+
+          FIRST:
+  A -> 04H [From M]
+  A - C -> 04H - 01H -> 3H
+  FLAGS: CY->0, S->0, Z->0
+
+          SECOND:
+  HL -> 0x1265 [0x1264 + 0x01]
+  B -> 01H - 01H -> 00H
+  #+end_example

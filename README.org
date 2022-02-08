@@ -1,7 +1,7 @@
 * 8085-Python
-A simple exploratory interpreter with REPL experience.
+A simple exploratory interpreter with REPL experience. (Beginning learning purpose only)
 
-- For windows users, you can download and run the =.exe= file  from [[https://github.com/hemanta212/releases/latest][releases page]].
+- For windows users, you can download and run the =.exe= file  from [[https://github.com/hemanta212/8085-simulator/releases/latest][releases page]].
 - Clone and run this repository,
 #+begin_src shell :eval never
   git clone https://github.com/hemanta212/8085-simulator
@@ -11,6 +11,8 @@ A simple exploratory interpreter with REPL experience.
 #+end_src
 
 Type =help= and run the commands listed.
+
+For detailed examples on available commands, see file [[file:usage_examples.org]].
 
 ** Table of contents
 :PROPERTIES:
@@ -28,7 +30,9 @@ Type =help= and run the commands listed.
   - [[#the-plainindirect-mode-option--i][The plain/indirect mode option (-i)]]
   - [[#the-verbosity-logging-option--v][The verbosity logging option (-v)]]
 - [[#using-from-terminal-vim-and-emacs][Using From Terminal, Vim and Emacs]]
-  - [[#example-emacs-config][Example Emacs config]]
+  - [[#example-emacs-org-babel-config][Example Emacs Org babel config]]
+  - [[#emacs-8085-major-mode][Emacs 8085 major mode]]
+- [[#extensive-usage-examples][Extensive Usage Examples]]
 :END:
 
 ** Features
@@ -47,8 +51,8 @@ Type =help= and run the commands listed.
 - [ ] - Implement proper 8-bit 16-bit type system and validation
 - [ ] - Implement a stacktrace in case of errors
 - [ ] - Implement integration test and actions CI
-- [ ] - A pypi package and pyinstaller executable
-- [ ] - Write a major mode for emacs.
+- [ ] - A pypi package
+- [-] - Write a major mode for emacs.
 
 ** REPL Mode
 #+begin_src shell :exports both :results output
@@ -135,6 +139,7 @@ In case of using multiple options, they need to be specified in order,
 Providing options otherwise will result in an error.
 
 ** Example Repl Workflow
+*NOTE* Fore more extensive examples for each commands, see file [[file:usage_examples.org]].
 
 #+begin_src shell :eval never
 >>> inspect
@@ -156,10 +161,9 @@ Registers:
 	M: 0x00
 
 Memory:
-	0x0000: 0x33
-	0x0001: 0x9A
-	0x000A: 0x2B
-	0x000B: 0x34
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
 
 Flags:
 	carry: 0
@@ -238,10 +242,9 @@ Registers:
 	M: 0x00
 
 Memory:
-	0x0000: 0x33
-	0x0001: 0x9A
-	0x000A: 0x2B
-	0x000B: 0x34
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
 	0x3322: 0x0a
 
 Flags:
@@ -322,10 +325,9 @@ Registers:
 	M: 0x00
 
 Memory:
-	0x0000: 0x33
-	0x0001: 0x9A
-	0x000A: 0x2B
-	0x000B: 0x34
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
 	0x5555: 0x05
 
 Flags:
@@ -374,7 +376,7 @@ Either you can:
 - Use combination of =-c= and =-db= option to emulate a repl session.
 - Use combnation of =-i= and =-db= option to emulate a repl session.
 
-*** Example Emacs config
+*** Example Emacs Org babel config
 With some configuration, the interpreter can be made to work with Emacs' Org Mode using the =org-babel-eval= function.
 This uses =-i= command option to write to the interpreter.
 
@@ -396,11 +398,53 @@ Put this in your =init.el= file,
         org-babel-8085-command
         (if args  (concat " -i " args) " -i " ))
        body)))
+
+  ;; Placeholder major mode, look below for more featured major mode
+  (define-derived-mode 8085-mode prog-mode "8085"
+     "Major mode for 8085."
+     (setq-local comment-start ";")
+     (setq-local comment-start-skip ";+[\t ]*"))
 #+end_src
 
 - The =path-to-8085= should be folder where you cloned this project.
 - The =org-babel-8085-command= should be the command to run the interpreter (eg python main.py),
   - You could use =(concat path-to-8085 "/.venv/bin/python")= in place of "=python="  if you use in-project virtual environments.
+
+*** Emacs 8085 major mode
+#+begin_src emacs-lisp :eval never
+    (require 'rx)
+    (defvar 8085-mode-map
+      (let ((map (make-sparse-keymap)))
+        map))
+
+  (defconst 8085--font-lock-defaults
+    (let (
+          (instructions '("MVI" "MOV" "ADD" "SUB" "ADI"
+                          "SUI" "JNZ" "JNC" "JZ" "JC" "LXI"
+                          "LXAD" "INR" "DCR" "INX" "DCX" "OUT"
+                          "HLT" "CPI" "CMP" "STA" "LDA")))
+      `(((,(rx-to-string `(: (or ,@instructions))) 0 font-lock-keyword-face)
+      ("\\([[:word:]]+\\):" 1 font-lock-function-name-face)))))
+
+    (defvar 8085-mode-syntax-table
+    (let ((st (make-syntax-table)))
+      ;; - and _ are word constituents
+      (modify-syntax-entry ?_ "w" st)
+      (modify-syntax-entry ?- "w" st)
+
+      ;; add comments. lua-mode does something similar, so it shouldn't
+      ;; bee *too* wrong.
+      (modify-syntax-entry ?\; "<" st)
+      (modify-syntax-entry ?\n ">" st)
+      st))
+
+    (define-derived-mode 8085-mode prog-mode "8085"
+      "Major mode for 8085."
+      (setq font-lock-defaults 8085--font-lock-defaults)
+      (setq-local comment-start ";")
+      (setq-local comment-start-skip ";+[\t ]*")
+      (setq-local case-fold-search nil))
+#+end_src
 
 Save and restart your emacs (or execute each block with =C-x C-e=).
 Then you can use org mode to write block like:
@@ -425,3 +469,5 @@ MVI B 80H
 MVI B 80H
 ,#+end_src
 #+end_example
+
+** [[file:usage_examples.org][Extensive Usage Examples]]
