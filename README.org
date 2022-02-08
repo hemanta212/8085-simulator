@@ -1,5 +1,5 @@
 * 8085-Python
-A simple exploratory interpreter with REPL experience.
+A simple exploratory interpreter with REPL experience. (Beginning learning purpose only)
 
 - For windows users, you can download and run the =.exe= file  from [[https://github.com/hemanta212/8085-simulator/releases/latest][releases page]].
 - Clone and run this repository,
@@ -11,6 +11,7 @@ A simple exploratory interpreter with REPL experience.
 #+end_src
 
 Type =help= and run the commands listed.
+
 For detailed examples on available commands, see file [[file:usage_examples.org]].
 
 ** Table of contents
@@ -30,7 +31,7 @@ For detailed examples on available commands, see file [[file:usage_examples.org]
   - [[#the-verbosity-logging-option--v][The verbosity logging option (-v)]]
 - [[#using-from-terminal-vim-and-emacs][Using From Terminal, Vim and Emacs]]
   - [[#example-emacs-org-babel-config][Example Emacs Org babel config]]
-  - [[#emacs-8085-major-mode-optional][Emacs 8085 major mode [optional]​]]
+  - [[#emacs-8085-major-mode][Emacs 8085 major mode]]
 - [[#extensive-usage-examples][Extensive Usage Examples]]
 :END:
 
@@ -50,8 +51,8 @@ For detailed examples on available commands, see file [[file:usage_examples.org]
 - [ ] - Implement proper 8-bit 16-bit type system and validation
 - [ ] - Implement a stacktrace in case of errors
 - [ ] - Implement integration test and actions CI
-- [ ] - A pypi package and pyinstaller executable
-- [ ] - Write a major mode for emacs.
+- [ ] - A pypi package
+- [-] - Write a major mode for emacs.
 
 ** REPL Mode
 #+begin_src shell :exports both :results output
@@ -409,7 +410,7 @@ Put this in your =init.el= file,
 - The =org-babel-8085-command= should be the command to run the interpreter (eg python main.py),
   - You could use =(concat path-to-8085 "/.venv/bin/python")= in place of "=python="  if you use in-project virtual environments.
 
-*** Emacs 8085 major mode [optional]
+*** Emacs 8085 major mode
 #+begin_src emacs-lisp :eval never
   ;; Optional Emacs major mode
     (require 'rx)
