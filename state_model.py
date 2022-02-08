@@ -8,6 +8,7 @@ from typing import Dict
 from loguru import logger
 
 from data import REGISTER_PAIRS
+from custom_dictionaries import RegisterDict, MemoryDict
 
 
 class State:
@@ -16,24 +17,28 @@ class State:
     """
 
     def __init__(self):
-        # Initialize state of registers with 0 hex values
-        self.registers: Dict[str, str] = {
-            "A": "0x00",
-            "B": "0x00",
-            "C": "0x00",
-            "D": "0x00",
-            "E": "0x00",
-            "H": "0x00",
-            "L": "0x00",
-            "M": "0x00",
-        }
         # Initialize few memory locations to garbage values
-        self.memory: Dict[str, str] = {
-            "0x0000": "0x33",
-            "0x0001": "0x9A",
-            "0x000A": "0x2B",
-            "0x000B": "0x34",
-        }
+        self.memory: MemoryDict = MemoryDict()
+        self.memory.update(
+            {
+                "0x1000": "0x2B",
+                "0x1001": "0x34",
+            }
+        )
+        # Initialize state of registers with 0 hex values
+        self.registers: RegisterDict = RegisterDict(self)
+        self.registers.update(
+            {
+                "A": "0x00",
+                "B": "0x00",
+                "C": "0x00",
+                "D": "0x00",
+                "E": "0x00",
+                "H": "0x00",
+                "L": "0x00",
+                "M": "0x00",
+            }
+        )
         # Initialize the flags
         self.flags: Dict[str, bool] = {
             "carry": False,
@@ -69,6 +74,9 @@ class State:
         return value_at_mem_addr
 
     def set_register_pair_value(self, value: str, register: str) -> None:
+        """
+        Takes a 16 bit value and splits it between register pairs
+        """
         REG1, REG2 = REGISTER_PAIRS[register]
         # Distribute the 16-bit hex in value literally half half to H and L
         # value -> 5533H --> '0x5533' -> [-2:] -> '0x55', '33' -> '0x' + '33'
@@ -81,12 +89,6 @@ class State:
         if register == "H":
             self.registers["M"] = self.get_register_pair_value("H")
         logger.debug(f"Pair {REG1}{REG2} Loaded: {first_hex}, {second_hex}")
-
-    def set_M(self, value: str) -> None:
-        self.set_register_pair_value(value, register="H")
-
-    def get_M(self) -> str:
-        return self.get_register_pair_value("H")
 
     @property
     def accumulator(self) -> str:
@@ -134,8 +136,10 @@ class State:
         with open(file_db, "r") as rf:
             state_data = json.load(rf)
 
-        self.registers = state_data["registers"]
-        self.memory = state_data["memory"]
+        self.memory = MemoryDict()
+        self.memory.update(state_data["memory"])
+        self.registers = RegisterDict(self)
+        self.registers.update(state_data["registers"])
 
     def save(self, file_db: str) -> None:
         if not file_db:
@@ -144,6 +148,8 @@ class State:
             with open(file_db, "w"):
                 pass
 
-        state_data = {"registers": self.registers, "memory": self.memory}
+        reg_data = {k: v for k, v in self.registers.items()}
+        mem_data = {k: v for k, v in self.memory.items()}
+        state_data = {"registers": reg_data, "memory": mem_data}
         with open(file_db, "w") as wf:
             json.dump(state_data, wf)
