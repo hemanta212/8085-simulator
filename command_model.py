@@ -146,10 +146,15 @@ class Command:
         acc_value = self.state.accumulator
         self.__add(value)
         logger.debug(f"ADDED: {self.state.accumulator}")
+
         print(
-            f"A -> {hex_to_simple(acc_value)} + {hex_to_simple(value)} -> {hex_to_simple(self.state.accumulator)}\n"
-            f"FLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
+            f"A -> {hex_to_simple(acc_value)} + {hex_to_simple(value)} -> {hex_to_simple(self.state.accumulator)}"
         )
+        flags = self.state.flags
+        if flags["carry"] or flags["zero"] or flags["sign"]:
+            print(
+                f"FLAGS: CY->{int(flags['carry'])}, S->{int(flags['sign'])}, Z->{int(flags['zero'])}"
+            )
 
     def add_immediate(self, args: tuple) -> None:
         """
@@ -161,9 +166,13 @@ class Command:
         self.__add(value)
         logger.debug(f"ADDED: {self.state.accumulator}")
         print(
-            f"A -> {hex_to_simple(acc_value)} + {hex_to_simple(value)} -> {hex_to_simple(self.state.accumulator)}\n"
-            f"FLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
+            f"A -> {hex_to_simple(acc_value)} + {hex_to_simple(value)} -> {hex_to_simple(self.state.accumulator)}\t"
         )
+        flags = self.state.flags
+        if flags["carry"] or flags["zero"] or flags["sign"]:
+            print(
+                f"FLAGS: CY->{int(flags['carry'])}, S->{int(flags['sign'])}, Z->{int(flags['zero'])}"
+            )
 
     def subtract_immediate(self, args: tuple) -> None:
         """
@@ -179,8 +188,8 @@ class Command:
             f"Subtracted '{value}' from '{acc_value}': {self.state.accumulator}"
         )
         print(
-            f"A -> {hex_to_simple(acc_value)} - {hex_to_simple(value)} -> {hex_to_simple(self.state.accumulator)}\n"
-            f"FLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
+            f"A -> {hex_to_simple(acc_value)} - {hex_to_simple(value)} -> {hex_to_simple(self.state.accumulator)}"
+            f"\nFLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
         )
 
     def subtract(self, args: tuple) -> None:
@@ -198,8 +207,8 @@ class Command:
             f"Subtracted '{register_value}' from '{acc_value}': {self.state.accumulator}"
         )
         print(
-            f"A - {register} -> {hex_to_simple(acc_value)} - {hex_to_simple(register_value)} -> {hex_to_simple(self.state.accumulator)}\n"
-            f"FLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
+            f"A - {register} -> {hex_to_simple(acc_value)} - {hex_to_simple(register_value)} -> {hex_to_simple(self.state.accumulator)}"
+            f"\nFLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
         )
 
     def compare_immediate(self, args: tuple) -> None:
@@ -213,8 +222,8 @@ class Command:
         result = self.__compare_sub_immediate(args)
         logger.debug(f"Compared '{value}' from '{acc_value}': {result}")
         print(
-            f"[A] {hex_to_simple(acc_value)} - {hex_to_simple(value)} -> {hex_to_simple(result)}\n"
-            f"FLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
+            f"[A] {hex_to_simple(acc_value)} - {hex_to_simple(value)} -> {hex_to_simple(result)}"
+            f"\nFLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
         )
 
     def compare(self, args: tuple) -> None:
@@ -229,8 +238,8 @@ class Command:
         result = self.__compare_sub_immediate((register_value,))
         logger.debug(f"Compared '{register_value}' from '{acc_value}': {result}")
         print(
-            f"A - {register} -> {hex_to_simple(acc_value)} - {hex_to_simple(register_value)} -> {hex_to_simple(result)}\n"
-            f"FLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
+            f"A - {register} -> {hex_to_simple(acc_value)} - {hex_to_simple(register_value)} -> {hex_to_simple(result)}"
+            f"\nFLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
         )
 
     def increment_register(self, args: tuple) -> None:

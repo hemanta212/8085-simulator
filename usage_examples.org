@@ -26,7 +26,7 @@
 
 * Commands
 #+begin_src shell :exports none
-rm -rf /tmp/8085-session1
+rm -rf /tmp/8085-session{1,2,3}
 #+end_src
 
 #+RESULTS:
@@ -142,19 +142,54 @@ ADD B
 #+RESULTS:
 : A -> 03H + 03H -> 06H
 
+#+begin_src 8085 :export both :args -db /tmp/8085-session1
+  MVI A ff;
+  ADI 01H;
+#+end_src
+
+#+RESULTS:
+: A -> FFH
+: A -> FFH + 01H -> 00H
+: FLAGS: CY->1, S->0, Z->0
+
 ** SUB/SUI
 #+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+  MVI A 03H
   SUB B
   SUI 04
   MVI A 06
 #+end_src
 
 #+RESULTS:
-: A - B -> 06H - 03H -> 03H
-: FLAGS: CY->0, S->0, Z->0
-: A -> 03H - 04H -> 01H
+: A -> 03H
+: A - B -> 03H - 03H -> 00H
+: FLAGS: CY->0, S->0, Z->1
+: A -> 00H - 04H -> 04H
 : FLAGS: CY->1, S->1, Z->0
 : A -> 06H
+
+#+begin_src 8085 :export both :args -db /tmp/8085-session1
+  OUT A
+  MVI A 11H
+  DCR A
+  DCR A
+  DCR A
+  DCR A
+  DCR A
+  DCR A
+  DCR A
+#+end_src
+
+#+RESULTS:
+: A: 06H
+: A -> 11H
+: A -> 11H - 01H -> 10H
+: A -> 10H - 01H -> 0FH
+: A -> 0FH - 01H -> 0EH
+: A -> 0EH - 01H -> 0DH
+: A -> 0DH - 01H -> 0CH
+: A -> 0CH - 01H -> 0BH
+: A -> 0BH - 01H -> 0AH
 
 ** CMP/CPI
 CMP B
@@ -166,26 +201,26 @@ CPI 05
 
 #+begin_src 8085 :args -db /tmp/8085-session1 :exports both
 CMP B
-CPI 07
+CPI 0b
 #+end_src
 
 #+RESULTS:
-: A - B -> 06H - 03H -> 3H
+: A - B -> 0AH - 03H -> 7H
 : FLAGS: CY->0, S->0, Z->0
-: [A] 06H - 07H -> 1H
+: [A] 0AH - 0BH -> 1H
 : FLAGS: CY->1, S->1, Z->0
 
 #+begin_src 8085 :args -db /tmp/8085-session1 :exports both
-  MVI C 07
+  MVI C 0c
   CMP C
   CPI 02H
 #+end_src
 
 #+RESULTS:
-: C -> 07H
-: A - C -> 06H - 07H -> 1H
+: C -> 0CH
+: A - C -> 0AH - 0CH -> 2H
 : FLAGS: CY->1, S->1, Z->0
-: [A] 06H - 02H -> 4H
+: [A] 0AH - 02H -> 8H
 : FLAGS: CY->0, S->0, Z->0
 
 ** STA
@@ -196,9 +231,9 @@ inspect
 #+RESULTS:
 #+begin_example
 Registers:
-	A: 0x06
+	A: 0x0a
 	B: 0x03
-	C: 0x07
+	C: 0x0c
 	D: 0x00
 	E: 0x00
 	H: 0x00
@@ -222,7 +257,7 @@ STA 3344H
 #+end_src
 
 #+RESULTS:
-: 3344H -> 06H
+: 3344H -> 0AH
 
 ** LDA
 #+begin_src 8085 :args -db /tmp/8085-session1 :exports both
@@ -232,9 +267,9 @@ STA 3344H
 #+RESULTS:
 #+begin_example
 Registers:
-	A: 0x06
+	A: 0x0a
 	B: 0x03
-	C: 0x07
+	C: 0x0c
 	D: 0x00
 	E: 0x00
 	H: 0x00
@@ -245,7 +280,7 @@ Memory:
 	0x1000: 0x2b
 	0x1001: 0x34
 	0x0000: 0x00
-	0x3344: 0x06
+	0x3344: 0x0a
 
 Flags:
 	carry: 0
@@ -305,18 +340,18 @@ inspect
 Registers:
 	A: 0x01
 	B: 0x02
-	C: 0x07
+	C: 0x0c
 	D: 0x00
 	E: 0x00
 	H: 0x33
 	L: 0x44
-	M: 0x06
+	M: 0x0a
 
 Memory:
 	0x1000: 0x2b
 	0x1001: 0x34
 	0x0000: 0x00
-	0x3344: 0x06
+	0x3344: 0x0a
 	0x0001: 0x00
 
 Flags:
@@ -407,18 +442,18 @@ inspect
 Registers:
 	A: 0x04
 	B: 0x02
-	C: 0x07
-	D: 0x00
-	E: 0x00
-	H: 0x33
-	L: 0x44
-	M: 0x06
+	C: 0x0c
+	D: 0x12
+	E: 0x60
+	H: 0x12
+	L: 0x60
+	M: 0x05
 
 Memory:
 	0x1000: 0x2b
 	0x1001: 0x34
 	0x0000: 0x00
-	0x3344: 0x06
+	0x3344: 0x0a
 	0x0001: 0x00
 	0x1260: 0x05
 	0x1261: 0x01
@@ -478,18 +513,18 @@ Flags:
   Registers:
           A: 0x05
           B: 0x00
-          C: 0x07
-          D: 0x00
-          E: 0x00
-          H: 0x33
-          L: 0x44
-          M: 0x06
+          C: 0x0c
+          D: 0x12
+          E: 0x60
+          H: 0x12
+          L: 0x60
+          M: 0x05
 
   Memory:
           0x1000: 0x2b
           0x1001: 0x34
           0x0000: 0x00
-          0x3344: 0x06
+          0x3344: 0x0a
           0x0001: 0x00
           0x1260: 0x05
           0x1261: 0x01
