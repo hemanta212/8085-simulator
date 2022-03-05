@@ -130,10 +130,11 @@ class Command:
         register = args[0]
         value = self.state.registers[register]
         acc_value = self.state.accumulator
-        self.state.accumulator = hex(int(acc_value, 16) + int(value, 16))
+        self.__add(value)
         logger.debug(f"ADDED: {self.state.accumulator}")
         print(
-            f"A -> {hex_to_simple(acc_value)} + {hex_to_simple(value)} -> {hex_to_simple(self.state.accumulator)}"
+            f"A -> {hex_to_simple(acc_value)} + {hex_to_simple(value)} -> {hex_to_simple(self.state.accumulator)}\n"
+            f"FLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
         )
 
     def add_immediate(self, args: tuple) -> None:
@@ -143,10 +144,11 @@ class Command:
         logger.debug(f"Add Immediate: {args}")
         value = args[0]
         acc_value = self.state.accumulator
-        self.state.accumulator = hex(int(acc_value, 16) + int(value, 16))
+        self.__add(value)
         logger.debug(f"ADDED: {self.state.accumulator}")
         print(
-            f"A -> {hex_to_simple(acc_value)} + {hex_to_simple(value)} -> {hex_to_simple(self.state.accumulator)}"
+            f"A -> {hex_to_simple(acc_value)} + {hex_to_simple(value)} -> {hex_to_simple(self.state.accumulator)}\n"
+            f"FLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
         )
 
     def subtract_immediate(self, args: tuple) -> None:
@@ -405,6 +407,24 @@ class Command:
         elif operation_value == 0:
             self.change_state_flags(carry=False, sign=False, zero=True)
         return hex(abs(operation_value))
+
+    def __add(self, value: str) -> None:
+        """
+        Core logic for both ADD and ADI operations
+        """
+        acc_value = self.state.accumulator
+        operation_value = int(acc_value, 16) + int(value, 16)
+        if operation_value > int("0xff", 16):
+            self.change_state_flags(carry=True, sign=False, zero=False)
+            hex_op_value = f"0x{int(hex(operation_value), 16):02x}"
+            carry_discarded_value = f"0x{hex_op_value[-2:]}"
+            self.state.accumulator = carry_discarded_value
+        elif operation_value == 0:
+            self.change_state_flags(carry=False, sign=False, zero=True)
+            self.state.accumulator = hex(operation_value)
+        else:
+            self.change_state_flags(carry=False, sign=False, zero=False)
+            self.state.accumulator = hex(operation_value)
 
     def __str__(self):
         label = f"{self.label}: " if self.label else ""
