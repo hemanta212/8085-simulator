@@ -122,6 +122,20 @@ class Command:
             f"{hex_to_simple(address)} ->" f" {hex_to_simple(self.state.accumulator)}"
         )
 
+    def store_accumulator_to_register_pair(self, args: tuple) -> None:
+        """
+        Store accumulator to register pair
+        """
+        logger.debug(f"STAX: {args}")
+        register = args[0]
+        REG1, REG2 = REGISTER_PAIRS[register]
+        mem_addr = self.state.get_mem_addr_register_pair(register)
+        self.state.memory[mem_addr] = self.state.accumulator
+        logger.debug(f"Stored from ACCUMULATOR: {self.state.accumulator} to {mem_addr}")
+        print(
+            f"{REG1}{REG2} [{mem_addr}] -> {hex_to_simple(self.state.accumulator)} [From A]"
+        )
+
     def add(self, args: tuple) -> None:
         """
         Add value from register to accumulator

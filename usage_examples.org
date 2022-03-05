@@ -338,17 +338,35 @@ Flags:
 : HL -> 0x1261 [0x1260 + 0x01]
 : HL -> 0x1260 [0x1261 - 0x01]
 
-** LDAX
-We refer to M for the value/data stored in xtended HL register
-For other we have to manually load the value to Accumulator
+** STAX
+We move data to M for writing value/data to xtended HL register
+For other we have to manually store the value from accumulator to xtended register pair
 #+begin_src 8085 :args -db /tmp/8085-session1 :exports both
-LXI D 1260H ; [1260H] contains value 05A
-LDAX D ; It puts that value to A
+          LXI D 1260H             ; DE -> 1260H
+          MVI A 0aH               ; A -> 0aH
+          STAX D                  ; DE [1260] now contains 0aH
 #+end_src
 
 #+RESULTS:
 : DE -> 0x1260 [D -> 0x12 E -> 0x60]
-: A -> 05H  ; FROM DE -> [0x1260]
+: A -> 0AH
+: DE [0x1260] -> 0AH [From A]
+
+** LDAX
+We refer to M for the value/data stored in xtended HL register
+For other we have to manually load the value to Accumulator
+#+begin_src 8085 :args -db /tmp/8085-session1 :exports both
+          MVI A 00H               ; reset A to 0H
+          LXI D 1260H             ; [1260H] contains value 0aH
+          LDAX D                  ; It puts that value to A
+          OUT A
+#+end_src
+
+#+RESULTS:
+: A -> 00H
+: DE -> 0x1260 [D -> 0x12 E -> 0x60]
+: A -> 0AH  ; FROM DE -> [0x1260]
+: A: 0AH
 
 * Practice Problems
 ** Register setup from 1260 to 1264

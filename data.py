@@ -125,6 +125,11 @@ COMMANDS = {
         "function": "load_accumulator_from_register_pair",
         "parameters": {"register_pair": {k: REGISTER_PAIRS[k] for k in ("B", "D")}},
     },
+    "STAX": {
+        "description": "Store accumulator to register pair",
+        "function": "store_accumulator_to_register_pair",
+        "parameters": {"register_pair": {k: REGISTER_PAIRS[k] for k in ("B", "D")}},
+    },
     "INX": {
         "description": "Incremented xtended register pairs",
         "function": "increment_extended_register",
