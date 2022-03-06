@@ -134,6 +134,11 @@ COMMANDS = {
             "value": "byte",
         },
     },
+    "RRC": {
+        "description": "Rotate Right Accumulator",
+        "function": "rotate_right_accumulator",
+        "parameters": {},
+    },
     "LDAX": {
         "description": "Load accumulator from register pair",
         "function": "load_accumulator_from_register_pair",
