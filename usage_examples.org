@@ -26,7 +26,7 @@
 
 * Commands
 #+begin_src shell :exports none
-rm -rf /tmp/8085-session{1,2,3}
+rm -rf /tmp/8085-session{1..1000}
 #+end_src
 
 #+RESULTS:
@@ -446,6 +446,8 @@ For other we have to manually load the value to Accumulator
   MVI A 02H
   RRC
   RRC
+  MVI A 02H
+  RRC
 #+end_src
 
 #+RESULTS:
@@ -454,6 +456,9 @@ For other we have to manually load the value to Accumulator
 : FLAGS: CY->0, S->0, Z->0
 : 01H >> 1 -> 00H
 : FLAGS: CY->1, S->0, Z->1
+: A -> 02H
+: 02H >> 1 -> 01H
+: FLAGS: CY->0, S->0, Z->0
 
 * Practice Problems
 ** Register setup from 1260 to 1264
@@ -699,3 +704,2016 @@ Flags:
   HL -> 0x1265 [0x1264 + 0x01]
   B -> 01H - 01H -> 00H
   #+end_example
+
+** WAP to add 10 bytes of data and store the 16-bit result at the end of memory address.
+*** Load memory
+#+begin_src 8085 :export both :args -db /tmp/8085-session2
+          MVI A 01H                       ; A = 01H
+          LXI H 1960H                     ; HL->1960
+          MVI B 09H                       ; B -> 05H
+  LOOP:   MOV M, A                        ; M -> A
+          ADI 01H                         ; A -> A + 1
+          INX H                           ; HL -> 1961
+  CHECK:  DCR B                           ; B -> B - 1
+          JNZ LOOP                        ; goto loop until B is zero
+          MVI M, FF                       ; HL [1969] -> FF
+          HLT                             ; Halt
+#+end_src
+
+#+RESULTS:
+#+begin_example
+A -> 01H
+HL -> 0x1960 [H -> 0x19 L -> 0x60]
+B -> 09H
+
+	LOOP:
+M -> 01H [From A]
+A -> 01H + 01H -> 02H
+HL -> 0x1961 [0x1960 + 0x01]
+
+	CHECK:
+B -> 09H - 01H -> 08H
+
+	LOOP:
+M -> 02H [From A]
+A -> 02H + 01H -> 03H
+HL -> 0x1962 [0x1961 + 0x01]
+
+	CHECK:
+B -> 08H - 01H -> 07H
+
+	LOOP:
+M -> 03H [From A]
+A -> 03H + 01H -> 04H
+HL -> 0x1963 [0x1962 + 0x01]
+
+	CHECK:
+B -> 07H - 01H -> 06H
+
+	LOOP:
+M -> 04H [From A]
+A -> 04H + 01H -> 05H
+HL -> 0x1964 [0x1963 + 0x01]
+
+	CHECK:
+B -> 06H - 01H -> 05H
+
+	LOOP:
+M -> 05H [From A]
+A -> 05H + 01H -> 06H
+HL -> 0x1965 [0x1964 + 0x01]
+
+	CHECK:
+B -> 05H - 01H -> 04H
+
+	LOOP:
+M -> 06H [From A]
+A -> 06H + 01H -> 07H
+HL -> 0x1966 [0x1965 + 0x01]
+
+	CHECK:
+B -> 04H - 01H -> 03H
+
+	LOOP:
+M -> 07H [From A]
+A -> 07H + 01H -> 08H
+HL -> 0x1967 [0x1966 + 0x01]
+
+	CHECK:
+B -> 03H - 01H -> 02H
+
+	LOOP:
+M -> 08H [From A]
+A -> 08H + 01H -> 09H
+HL -> 0x1968 [0x1967 + 0x01]
+
+	CHECK:
+B -> 02H - 01H -> 01H
+
+	LOOP:
+M -> 09H [From A]
+A -> 09H + 01H -> 0AH
+HL -> 0x1969 [0x1968 + 0x01]
+
+	CHECK:
+B -> 01H - 01H -> 00H
+M -> FFH
+#+end_example
+
+*** Program
+**** Inspection
+#+begin_src 8085 :export both :args -db /tmp/8085-session2
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x0a
+	B: 0x00
+	C: 0x00
+	D: 0x00
+	E: 0x00
+	H: 0x19
+	L: 0x69
+	M: 0xff
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x1960: 0x01
+	0x1961: 0x02
+	0x1962: 0x03
+	0x1963: 0x04
+	0x1964: 0x05
+	0x1965: 0x06
+	0x1966: 0x07
+	0x1967: 0x08
+	0x1968: 0x09
+	0x1969: 0xff
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+**** Code
+#+begin_src 8085 :export both :args -db /tmp/8085-session2
+  START:  MVI A 0H                ; A -> 0 (sum)
+          MVI C 0H                ; C -> 0 (carry)
+          MVI B 0AH               ; B -> AH (counter)
+          LXI H 1960H             ; HL -> 1960
+  LOOP:   ADD M                   ; A = A + M
+          JNC NEXT
+          INR C
+  NEXT:   INX H                   ; HL -> 1961
+          DCR B                   ; B -> B -1
+          JNZ LOOP                ; goto loop until B -> 0
+  FINISH: MOV M, A                ; HL [1970]->A
+          INX H                   ; HL -> 1971
+          MOV M, C                ; HL [1971] -> C
+          HLT
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+	START:
+A -> 00H
+C -> 00H
+B -> 0AH
+HL -> 0x1960 [H -> 0x19 L -> 0x60]
+
+	LOOP:
+A -> 00H + 01H -> 01H
+
+	NEXT:
+HL -> 0x1961 [0x1960 + 0x01]
+B -> 0AH - 01H -> 09H
+
+	LOOP:
+A -> 01H + 02H -> 03H
+
+	NEXT:
+HL -> 0x1962 [0x1961 + 0x01]
+B -> 09H - 01H -> 08H
+
+	LOOP:
+A -> 03H + 03H -> 06H
+
+	NEXT:
+HL -> 0x1963 [0x1962 + 0x01]
+B -> 08H - 01H -> 07H
+
+	LOOP:
+A -> 06H + 04H -> 0AH
+
+	NEXT:
+HL -> 0x1964 [0x1963 + 0x01]
+B -> 07H - 01H -> 06H
+
+	LOOP:
+A -> 0AH + 05H -> 0FH
+
+	NEXT:
+HL -> 0x1965 [0x1964 + 0x01]
+B -> 06H - 01H -> 05H
+
+	LOOP:
+A -> 0FH + 06H -> 15H
+
+	NEXT:
+HL -> 0x1966 [0x1965 + 0x01]
+B -> 05H - 01H -> 04H
+
+	LOOP:
+A -> 15H + 07H -> 1CH
+
+	NEXT:
+HL -> 0x1967 [0x1966 + 0x01]
+B -> 04H - 01H -> 03H
+
+	LOOP:
+A -> 1CH + 08H -> 24H
+
+	NEXT:
+HL -> 0x1968 [0x1967 + 0x01]
+B -> 03H - 01H -> 02H
+
+	LOOP:
+A -> 24H + 09H -> 2DH
+
+	NEXT:
+HL -> 0x1969 [0x1968 + 0x01]
+B -> 02H - 01H -> 01H
+
+	LOOP:
+A -> 2DH + FFH -> 2CH
+FLAGS: CY->1, S->0, Z->0
+C -> 00H + 01H -> 01H
+
+	NEXT:
+HL -> 0x196a [0x1969 + 0x01]
+B -> 01H - 01H -> 00H
+
+	FINISH:
+M -> 2CH [From A]
+HL -> 0x196b [0x196a + 0x01]
+M -> 01H [From C]
+#+end_example
+
+**** Inspection
+#+begin_src 8085 :export both :args -db /tmp/8085-session2
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x2c
+	B: 0x00
+	C: 0x01
+	D: 0x00
+	E: 0x00
+	H: 0x19
+	L: 0x6b
+	M: 0x01
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x1960: 0x01
+	0x1961: 0x02
+	0x1962: 0x03
+	0x1963: 0x04
+	0x1964: 0x05
+	0x1965: 0x06
+	0x1966: 0x07
+	0x1967: 0x08
+	0x1968: 0x09
+	0x1969: 0xff
+	0x196a: 0x2c
+	0x196b: 0x01
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+** WAP to transfer 20 bytes of data stored in memory having starting address 2012H to the memory having starting address of 8000H in reverse order.
+*** Load memory
+#+begin_src 8085 :export both :args -db /tmp/8085-session3
+          MVI A 01H                       ; A = 01H
+          LXI H 2025H                     ; HL -> 2025 (2012 + 19)
+          MVI B 14H                       ; B -> 14H -> (dec: 20)
+  LOOP:   MOV M, A                        ; M -> A
+          ADI 01H                         ; A -> A + 1
+          DCX H                           ; HL -> 1961
+  CHECK:  DCR B                           ; B -> B - 1
+          JNZ LOOP                        ; goto loop until B is zero
+          HLT                             ; Halt
+#+end_src
+
+#+RESULTS:
+#+begin_example
+A -> 01H
+HL -> 0x2025 [H -> 0x20 L -> 0x25]
+B -> 14H
+
+	LOOP:
+M -> 01H [From A]
+A -> 01H + 01H -> 02H
+HL -> 0x2024 [0x2025 - 0x01]
+
+	CHECK:
+B -> 14H - 01H -> 13H
+
+	LOOP:
+M -> 02H [From A]
+A -> 02H + 01H -> 03H
+HL -> 0x2023 [0x2024 - 0x01]
+
+	CHECK:
+B -> 13H - 01H -> 12H
+
+	LOOP:
+M -> 03H [From A]
+A -> 03H + 01H -> 04H
+HL -> 0x2022 [0x2023 - 0x01]
+
+	CHECK:
+B -> 12H - 01H -> 11H
+
+	LOOP:
+M -> 04H [From A]
+A -> 04H + 01H -> 05H
+HL -> 0x2021 [0x2022 - 0x01]
+
+	CHECK:
+B -> 11H - 01H -> 10H
+
+	LOOP:
+M -> 05H [From A]
+A -> 05H + 01H -> 06H
+HL -> 0x2020 [0x2021 - 0x01]
+
+	CHECK:
+B -> 10H - 01H -> 0FH
+
+	LOOP:
+M -> 06H [From A]
+A -> 06H + 01H -> 07H
+HL -> 0x201f [0x2020 - 0x01]
+
+	CHECK:
+B -> 0FH - 01H -> 0EH
+
+	LOOP:
+M -> 07H [From A]
+A -> 07H + 01H -> 08H
+HL -> 0x201e [0x201f - 0x01]
+
+	CHECK:
+B -> 0EH - 01H -> 0DH
+
+	LOOP:
+M -> 08H [From A]
+A -> 08H + 01H -> 09H
+HL -> 0x201d [0x201e - 0x01]
+
+	CHECK:
+B -> 0DH - 01H -> 0CH
+
+	LOOP:
+M -> 09H [From A]
+A -> 09H + 01H -> 0AH
+HL -> 0x201c [0x201d - 0x01]
+
+	CHECK:
+B -> 0CH - 01H -> 0BH
+
+	LOOP:
+M -> 0AH [From A]
+A -> 0AH + 01H -> 0BH
+HL -> 0x201b [0x201c - 0x01]
+
+	CHECK:
+B -> 0BH - 01H -> 0AH
+
+	LOOP:
+M -> 0BH [From A]
+A -> 0BH + 01H -> 0CH
+HL -> 0x201a [0x201b - 0x01]
+
+	CHECK:
+B -> 0AH - 01H -> 09H
+
+	LOOP:
+M -> 0CH [From A]
+A -> 0CH + 01H -> 0DH
+HL -> 0x2019 [0x201a - 0x01]
+
+	CHECK:
+B -> 09H - 01H -> 08H
+
+	LOOP:
+M -> 0DH [From A]
+A -> 0DH + 01H -> 0EH
+HL -> 0x2018 [0x2019 - 0x01]
+
+	CHECK:
+B -> 08H - 01H -> 07H
+
+	LOOP:
+M -> 0EH [From A]
+A -> 0EH + 01H -> 0FH
+HL -> 0x2017 [0x2018 - 0x01]
+
+	CHECK:
+B -> 07H - 01H -> 06H
+
+	LOOP:
+M -> 0FH [From A]
+A -> 0FH + 01H -> 10H
+HL -> 0x2016 [0x2017 - 0x01]
+
+	CHECK:
+B -> 06H - 01H -> 05H
+
+	LOOP:
+M -> 10H [From A]
+A -> 10H + 01H -> 11H
+HL -> 0x2015 [0x2016 - 0x01]
+
+	CHECK:
+B -> 05H - 01H -> 04H
+
+	LOOP:
+M -> 11H [From A]
+A -> 11H + 01H -> 12H
+HL -> 0x2014 [0x2015 - 0x01]
+
+	CHECK:
+B -> 04H - 01H -> 03H
+
+	LOOP:
+M -> 12H [From A]
+A -> 12H + 01H -> 13H
+HL -> 0x2013 [0x2014 - 0x01]
+
+	CHECK:
+B -> 03H - 01H -> 02H
+
+	LOOP:
+M -> 13H [From A]
+A -> 13H + 01H -> 14H
+HL -> 0x2012 [0x2013 - 0x01]
+
+	CHECK:
+B -> 02H - 01H -> 01H
+
+	LOOP:
+M -> 14H [From A]
+A -> 14H + 01H -> 15H
+HL -> 0x2011 [0x2012 - 0x01]
+
+	CHECK:
+B -> 01H - 01H -> 00H
+#+end_example
+
+*** Program
+**** Inspection
+#+begin_src 8085 :export both :args -db /tmp/8085-session3
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x15
+	B: 0x00
+	C: 0x00
+	D: 0x00
+	E: 0x00
+	H: 0x20
+	L: 0x11
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x2025: 0x01
+	0x2024: 0x02
+	0x2023: 0x03
+	0x2022: 0x04
+	0x2021: 0x05
+	0x2020: 0x06
+	0x201f: 0x07
+	0x201e: 0x08
+	0x201d: 0x09
+	0x201c: 0x0a
+	0x201b: 0x0b
+	0x201a: 0x0c
+	0x2019: 0x0d
+	0x2018: 0x0e
+	0x2017: 0x0f
+	0x2016: 0x10
+	0x2015: 0x11
+	0x2014: 0x12
+	0x2013: 0x13
+	0x2012: 0x14
+	0x2011: 0x00
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+**** Code
+#+begin_src 8085 :export both :args -db /tmp/8085-session3
+  START:  LXI H 2025H            ; HL -> 2025
+          LXI D 8000H            ; DE -> 8000
+          MVI B 14H               ; B -> 14 (counter) (dec: 20)
+  LOOP:   MOV A, M                ; A -> M [2025]
+          STAX D                  ; DE [80000] -> A
+          DCX H                   ; HL -> 2024
+          INX D                   ; DE -> 8001
+  CHECK:  DCR B                   ; B -> B -1
+          JNZ LOOP                ; Keep looping until zero
+          HLT
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+	START:
+HL -> 0x2025 [H -> 0x20 L -> 0x25]
+DE -> 0x8000 [D -> 0x80 E -> 0x00]
+B -> 14H
+
+	LOOP:
+A -> 01H [From M]
+DE [0x8000] -> 01H [From A]
+HL -> 0x2024 [0x2025 - 0x01]
+DE -> 0x8001 [0x8000 + 0x01]
+
+	CHECK:
+B -> 14H - 01H -> 13H
+
+	LOOP:
+A -> 02H [From M]
+DE [0x8001] -> 02H [From A]
+HL -> 0x2023 [0x2024 - 0x01]
+DE -> 0x8002 [0x8001 + 0x01]
+
+	CHECK:
+B -> 13H - 01H -> 12H
+
+	LOOP:
+A -> 03H [From M]
+DE [0x8002] -> 03H [From A]
+HL -> 0x2022 [0x2023 - 0x01]
+DE -> 0x8003 [0x8002 + 0x01]
+
+	CHECK:
+B -> 12H - 01H -> 11H
+
+	LOOP:
+A -> 04H [From M]
+DE [0x8003] -> 04H [From A]
+HL -> 0x2021 [0x2022 - 0x01]
+DE -> 0x8004 [0x8003 + 0x01]
+
+	CHECK:
+B -> 11H - 01H -> 10H
+
+	LOOP:
+A -> 05H [From M]
+DE [0x8004] -> 05H [From A]
+HL -> 0x2020 [0x2021 - 0x01]
+DE -> 0x8005 [0x8004 + 0x01]
+
+	CHECK:
+B -> 10H - 01H -> 0FH
+
+	LOOP:
+A -> 06H [From M]
+DE [0x8005] -> 06H [From A]
+HL -> 0x201f [0x2020 - 0x01]
+DE -> 0x8006 [0x8005 + 0x01]
+
+	CHECK:
+B -> 0FH - 01H -> 0EH
+
+	LOOP:
+A -> 07H [From M]
+DE [0x8006] -> 07H [From A]
+HL -> 0x201e [0x201f - 0x01]
+DE -> 0x8007 [0x8006 + 0x01]
+
+	CHECK:
+B -> 0EH - 01H -> 0DH
+
+	LOOP:
+A -> 08H [From M]
+DE [0x8007] -> 08H [From A]
+HL -> 0x201d [0x201e - 0x01]
+DE -> 0x8008 [0x8007 + 0x01]
+
+	CHECK:
+B -> 0DH - 01H -> 0CH
+
+	LOOP:
+A -> 09H [From M]
+DE [0x8008] -> 09H [From A]
+HL -> 0x201c [0x201d - 0x01]
+DE -> 0x8009 [0x8008 + 0x01]
+
+	CHECK:
+B -> 0CH - 01H -> 0BH
+
+	LOOP:
+A -> 0AH [From M]
+DE [0x8009] -> 0AH [From A]
+HL -> 0x201b [0x201c - 0x01]
+DE -> 0x800a [0x8009 + 0x01]
+
+	CHECK:
+B -> 0BH - 01H -> 0AH
+
+	LOOP:
+A -> 0BH [From M]
+DE [0x800a] -> 0BH [From A]
+HL -> 0x201a [0x201b - 0x01]
+DE -> 0x800b [0x800a + 0x01]
+
+	CHECK:
+B -> 0AH - 01H -> 09H
+
+	LOOP:
+A -> 0CH [From M]
+DE [0x800b] -> 0CH [From A]
+HL -> 0x2019 [0x201a - 0x01]
+DE -> 0x800c [0x800b + 0x01]
+
+	CHECK:
+B -> 09H - 01H -> 08H
+
+	LOOP:
+A -> 0DH [From M]
+DE [0x800c] -> 0DH [From A]
+HL -> 0x2018 [0x2019 - 0x01]
+DE -> 0x800d [0x800c + 0x01]
+
+	CHECK:
+B -> 08H - 01H -> 07H
+
+	LOOP:
+A -> 0EH [From M]
+DE [0x800d] -> 0EH [From A]
+HL -> 0x2017 [0x2018 - 0x01]
+DE -> 0x800e [0x800d + 0x01]
+
+	CHECK:
+B -> 07H - 01H -> 06H
+
+	LOOP:
+A -> 0FH [From M]
+DE [0x800e] -> 0FH [From A]
+HL -> 0x2016 [0x2017 - 0x01]
+DE -> 0x800f [0x800e + 0x01]
+
+	CHECK:
+B -> 06H - 01H -> 05H
+
+	LOOP:
+A -> 10H [From M]
+DE [0x800f] -> 10H [From A]
+HL -> 0x2015 [0x2016 - 0x01]
+DE -> 0x8010 [0x800f + 0x01]
+
+	CHECK:
+B -> 05H - 01H -> 04H
+
+	LOOP:
+A -> 11H [From M]
+DE [0x8010] -> 11H [From A]
+HL -> 0x2014 [0x2015 - 0x01]
+DE -> 0x8011 [0x8010 + 0x01]
+
+	CHECK:
+B -> 04H - 01H -> 03H
+
+	LOOP:
+A -> 12H [From M]
+DE [0x8011] -> 12H [From A]
+HL -> 0x2013 [0x2014 - 0x01]
+DE -> 0x8012 [0x8011 + 0x01]
+
+	CHECK:
+B -> 03H - 01H -> 02H
+
+	LOOP:
+A -> 13H [From M]
+DE [0x8012] -> 13H [From A]
+HL -> 0x2012 [0x2013 - 0x01]
+DE -> 0x8013 [0x8012 + 0x01]
+
+	CHECK:
+B -> 02H - 01H -> 01H
+
+	LOOP:
+A -> 14H [From M]
+DE [0x8013] -> 14H [From A]
+HL -> 0x2011 [0x2012 - 0x01]
+DE -> 0x8014 [0x8013 + 0x01]
+
+	CHECK:
+B -> 01H - 01H -> 00H
+#+end_example
+
+**** Inspection
+#+begin_src 8085 :export both :args -db /tmp/8085-session3
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x14
+	B: 0x00
+	C: 0x00
+	D: 0x80
+	E: 0x14
+	H: 0x20
+	L: 0x11
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x2025: 0x01
+	0x2024: 0x02
+	0x2023: 0x03
+	0x2022: 0x04
+	0x2021: 0x05
+	0x2020: 0x06
+	0x201f: 0x07
+	0x201e: 0x08
+	0x201d: 0x09
+	0x201c: 0x0a
+	0x201b: 0x0b
+	0x201a: 0x0c
+	0x2019: 0x0d
+	0x2018: 0x0e
+	0x2017: 0x0f
+	0x2016: 0x10
+	0x2015: 0x11
+	0x2014: 0x12
+	0x2013: 0x13
+	0x2012: 0x14
+	0x2011: 0x00
+	0x8000: 0x01
+	0x8001: 0x02
+	0x8002: 0x03
+	0x8003: 0x04
+	0x8004: 0x05
+	0x8005: 0x06
+	0x8006: 0x07
+	0x8007: 0x08
+	0x8008: 0x09
+	0x8009: 0x0a
+	0x800a: 0x0b
+	0x800b: 0x0c
+	0x800c: 0x0d
+	0x800d: 0x0e
+	0x800e: 0x0f
+	0x800f: 0x10
+	0x8010: 0x11
+	0x8011: 0x12
+	0x8012: 0x13
+	0x8013: 0x14
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+** WAP to multiply the 10H and 14H and show the 16 bit result through any port
+#+begin_src 8085 :export both :args -db /tmp/8085-session4
+  START:  MVI A 0H               ; A -> 0H
+          MVI B 10H               ; B -> 10H (counter)
+          MVI C 00H               ; C -> 0H (carry)
+  LOOP:   ADI 14H                 ; A -> A + 14H
+          JNC CHECK               ; if no carry jump otherwise add to C
+          INR C                   ; C -> C + 1
+  CHECK:  DCR B                   ; B -> 0FH
+          JNZ LOOP                ; keep looping until 0
+  DSPLY:  OUT PORT1
+          MOV A, C                ; A -> C
+          OUT PORT2
+          HLT
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+	START:
+A -> 00H
+B -> 10H
+C -> 00H
+
+	LOOP:
+A -> 00H + 14H -> 14H
+
+	CHECK:
+B -> 10H - 01H -> 0FH
+
+	LOOP:
+A -> 14H + 14H -> 28H
+
+	CHECK:
+B -> 0FH - 01H -> 0EH
+
+	LOOP:
+A -> 28H + 14H -> 3CH
+
+	CHECK:
+B -> 0EH - 01H -> 0DH
+
+	LOOP:
+A -> 3CH + 14H -> 50H
+
+	CHECK:
+B -> 0DH - 01H -> 0CH
+
+	LOOP:
+A -> 50H + 14H -> 64H
+
+	CHECK:
+B -> 0CH - 01H -> 0BH
+
+	LOOP:
+A -> 64H + 14H -> 78H
+
+	CHECK:
+B -> 0BH - 01H -> 0AH
+
+	LOOP:
+A -> 78H + 14H -> 8CH
+
+	CHECK:
+B -> 0AH - 01H -> 09H
+
+	LOOP:
+A -> 8CH + 14H -> A0H
+
+	CHECK:
+B -> 09H - 01H -> 08H
+
+	LOOP:
+A -> A0H + 14H -> B4H
+
+	CHECK:
+B -> 08H - 01H -> 07H
+
+	LOOP:
+A -> B4H + 14H -> C8H
+
+	CHECK:
+B -> 07H - 01H -> 06H
+
+	LOOP:
+A -> C8H + 14H -> DCH
+
+	CHECK:
+B -> 06H - 01H -> 05H
+
+	LOOP:
+A -> DCH + 14H -> F0H
+
+	CHECK:
+B -> 05H - 01H -> 04H
+
+	LOOP:
+A -> F0H + 14H -> 04H
+FLAGS: CY->1, S->0, Z->0
+C -> 00H + 01H -> 01H
+
+	CHECK:
+B -> 04H - 01H -> 03H
+
+	LOOP:
+A -> 04H + 14H -> 18H
+
+	CHECK:
+B -> 03H - 01H -> 02H
+
+	LOOP:
+A -> 18H + 14H -> 2CH
+
+	CHECK:
+B -> 02H - 01H -> 01H
+
+	LOOP:
+A -> 2CH + 14H -> 40H
+
+	CHECK:
+B -> 01H - 01H -> 00H
+
+	DSPLY:
+PORT1: 40H
+A -> 01H [From C]
+PORT2: 01H
+#+end_example
+
+** WAP to count the positive and negative numbers among 20 bytes of data
+*** Loading
+#+begin_src 8085 :export both :args -db /tmp/8085-session5
+  LXI H 1260
+  MVI M 56H
+  INX H
+  MVI M A9H
+  INX H
+  MVI M 73H
+  INX H
+  MVI M 82H
+  INX H
+  MVI M 0H
+#+end_src
+
+#+RESULTS:
+#+begin_example
+HL -> 0x1260 [H -> 0x12 L -> 0x60]
+M -> 56H
+HL -> 0x1261 [0x1260 + 0x01]
+M -> A9H
+HL -> 0x1262 [0x1261 + 0x01]
+M -> 73H
+HL -> 0x1263 [0x1262 + 0x01]
+M -> 82H
+HL -> 0x1264 [0x1263 + 0x01]
+M -> 00H
+#+end_example
+
+*** Program
+**** Inspect
+#+begin_src 8085 :export both :args -db /tmp/8085-session5
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x00
+	B: 0x00
+	C: 0x00
+	D: 0x00
+	E: 0x00
+	H: 0x12
+	L: 0x64
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x1260: 0x56
+	0x1261: 0xa9
+	0x1262: 0x73
+	0x1263: 0x82
+	0x1264: 0x00
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+**** Code
+#+begin_src 8085 :export both :args -db /tmp/8085-session5
+  START:  MVI A 00H               ; A -> 0H
+          MVI B 05H               ; B -> 05/14H (counter)
+          LXI H 1260H             ; HL -> 1260H
+          MVI C 00H               ; +ve counter
+          MVI D 00H               ; -ve counter
+  EVAL:   MOV A, M                ; A -> M -> [1260]
+          ANI 80H                 ; A & 80H
+          JZ SKPNEG               ; if MSB == 0
+          INR D                   ; MSB == 1 so -ve ++
+  SKPNEG: INX H                   ; HL -> 1261
+          DCR B                   ; B -> B -1
+          JNZ EVAL                ; eval until counter is 0
+          MVI A 05H               ; A -> 05H (total bytes)
+          SUB D                   ; A - D -> +ve count
+          MOV C, A                ; C -> A
+          HLT
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+	START:
+A -> 00H
+B -> 05H
+HL -> 0x1260 [H -> 0x12 L -> 0x60]
+C -> 00H
+D -> 00H
+
+	EVAL:
+A -> 56H [From M]
+56H & 80H -> 00H
+FLAGS: CY->0, S->0, Z->1
+
+	SKPNEG:
+HL -> 0x1261 [0x1260 + 0x01]
+B -> 05H - 01H -> 04H
+
+	EVAL:
+A -> A9H [From M]
+A9H & 80H -> 80H
+D -> 00H + 01H -> 01H
+
+	SKPNEG:
+HL -> 0x1262 [0x1261 + 0x01]
+B -> 04H - 01H -> 03H
+
+	EVAL:
+A -> 73H [From M]
+73H & 80H -> 00H
+FLAGS: CY->0, S->0, Z->1
+
+	SKPNEG:
+HL -> 0x1263 [0x1262 + 0x01]
+B -> 03H - 01H -> 02H
+
+	EVAL:
+A -> 82H [From M]
+82H & 80H -> 80H
+D -> 01H + 01H -> 02H
+
+	SKPNEG:
+HL -> 0x1264 [0x1263 + 0x01]
+B -> 02H - 01H -> 01H
+
+	EVAL:
+A -> 00H [From M]
+00H & 80H -> 00H
+FLAGS: CY->0, S->0, Z->1
+
+	SKPNEG:
+HL -> 0x1265 [0x1264 + 0x01]
+B -> 01H - 01H -> 00H
+A -> 05H
+A - D -> 05H - 02H -> 03H
+FLAGS: CY->0, S->0, Z->0
+C -> 03H [From A]
+#+end_example
+
+** There are two tables with 10 byte data each, WAP to add correspoding nums and show result at port 00H
+*** Loading
+#+begin_src 8085 :export both :args -db /tmp/8085-session6
+  MVI A 01H
+  MVI B 05H
+  LXI H 1260H
+  LXI D 1364H
+  LOOP: MOV M, B
+        STAX D
+        INR A
+        INX H
+        DCX D
+  NEXT: DCR B
+        JNZ LOOP
+        HLT
+#+end_src
+
+#+RESULTS:
+#+begin_example
+A -> 01H
+B -> 05H
+HL -> 0x1260 [H -> 0x12 L -> 0x60]
+DE -> 0x1364 [D -> 0x13 E -> 0x64]
+
+	LOOP:
+M -> 05H [From B]
+DE [0x1364] -> 01H [From A]
+A -> 01H + 01H -> 02H
+HL -> 0x1261 [0x1260 + 0x01]
+DE -> 0x1363 [0x1364 - 0x01]
+
+	NEXT:
+B -> 05H - 01H -> 04H
+
+	LOOP:
+M -> 04H [From B]
+DE [0x1363] -> 02H [From A]
+A -> 02H + 01H -> 03H
+HL -> 0x1262 [0x1261 + 0x01]
+DE -> 0x1362 [0x1363 - 0x01]
+
+	NEXT:
+B -> 04H - 01H -> 03H
+
+	LOOP:
+M -> 03H [From B]
+DE [0x1362] -> 03H [From A]
+A -> 03H + 01H -> 04H
+HL -> 0x1263 [0x1262 + 0x01]
+DE -> 0x1361 [0x1362 - 0x01]
+
+	NEXT:
+B -> 03H - 01H -> 02H
+
+	LOOP:
+M -> 02H [From B]
+DE [0x1361] -> 04H [From A]
+A -> 04H + 01H -> 05H
+HL -> 0x1264 [0x1263 + 0x01]
+DE -> 0x1360 [0x1361 - 0x01]
+
+	NEXT:
+B -> 02H - 01H -> 01H
+
+	LOOP:
+M -> 01H [From B]
+DE [0x1360] -> 05H [From A]
+A -> 05H + 01H -> 06H
+HL -> 0x1265 [0x1264 + 0x01]
+DE -> 0x135f [0x1360 - 0x01]
+
+	NEXT:
+B -> 01H - 01H -> 00H
+#+end_example
+
+*** Program
+**** Inspect
+#+begin_src 8085 :export both :args -db /tmp/8085-session6
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x06
+	B: 0x00
+	C: 0x00
+	D: 0x13
+	E: 0x5f
+	H: 0x12
+	L: 0x65
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x1260: 0x05
+	0x1364: 0x01
+	0x1261: 0x04
+	0x1363: 0x02
+	0x1262: 0x03
+	0x1362: 0x03
+	0x1263: 0x02
+	0x1361: 0x04
+	0x1264: 0x01
+	0x1360: 0x05
+	0x1265: 0x00
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+**** Code
+#+begin_src 8085 :export both :args -db /tmp/8085-session6
+  START:  MVI A 00H               ; A -> 0H
+          LXI H 1260H
+          LXI D 1360H
+          MVI B 05H
+  LOOP:   LDAX D
+          ADD M
+          OUT 00H
+  NEXT:   INX D
+          INX H
+          DCR B
+          JNZ LOOP
+          HLT
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+	START:
+A -> 00H
+HL -> 0x1260 [H -> 0x12 L -> 0x60]
+DE -> 0x1360 [D -> 0x13 E -> 0x60]
+B -> 05H
+
+	LOOP:
+A -> 05H  ; FROM DE -> [0x1360]
+A -> 05H + 05H -> 0AH
+00H: 0AH
+
+	NEXT:
+DE -> 0x1361 [0x1360 + 0x01]
+HL -> 0x1261 [0x1260 + 0x01]
+B -> 05H - 01H -> 04H
+
+	LOOP:
+A -> 04H  ; FROM DE -> [0x1361]
+A -> 04H + 04H -> 08H
+00H: 08H
+
+	NEXT:
+DE -> 0x1362 [0x1361 + 0x01]
+HL -> 0x1262 [0x1261 + 0x01]
+B -> 04H - 01H -> 03H
+
+	LOOP:
+A -> 03H  ; FROM DE -> [0x1362]
+A -> 03H + 03H -> 06H
+00H: 06H
+
+	NEXT:
+DE -> 0x1363 [0x1362 + 0x01]
+HL -> 0x1263 [0x1262 + 0x01]
+B -> 03H - 01H -> 02H
+
+	LOOP:
+A -> 02H  ; FROM DE -> [0x1363]
+A -> 02H + 02H -> 04H
+00H: 04H
+
+	NEXT:
+DE -> 0x1364 [0x1363 + 0x01]
+HL -> 0x1264 [0x1263 + 0x01]
+B -> 02H - 01H -> 01H
+
+	LOOP:
+A -> 01H  ; FROM DE -> [0x1364]
+A -> 01H + 01H -> 02H
+00H: 02H
+
+	NEXT:
+DE -> 0x1365 [0x1364 + 0x01]
+HL -> 0x1265 [0x1264 + 0x01]
+B -> 01H - 01H -> 00H
+#+end_example
+
+** There are 10 numbers in memory. WAP to add only positive numbers and show the result at output ports 80H.
+
+*** Loading
+#+begin_src 8085 :export both :args -db /tmp/8085-session7
+  LXI H 1260
+  MVI M 56H
+  INX H
+  MVI M A9H
+  INX H
+  MVI M 73H
+  INX H
+  MVI M 82H
+  INX H
+  MVI M 0H
+#+end_src
+
+#+RESULTS:
+#+begin_example
+HL -> 0x1260 [H -> 0x12 L -> 0x60]
+M -> 56H
+HL -> 0x1261 [0x1260 + 0x01]
+M -> A9H
+HL -> 0x1262 [0x1261 + 0x01]
+M -> 73H
+HL -> 0x1263 [0x1262 + 0x01]
+M -> 82H
+HL -> 0x1264 [0x1263 + 0x01]
+M -> 00H
+#+end_example
+*** Program
+#+begin_src 8085 :export both :args -db /tmp/8085-session7
+  START:  MVI A 00H
+          MVI B 05H               ; B -> 05/0AH
+          MVI C 00H               ; C-> 0H (Sum)
+          LXI H 1260H
+  LOOP:   MOV A, M
+          ANI 80H
+          JNZ SKP+VE
+          MOV A, M
+          ADD C
+          MOV C, A
+  SKP+VE: INX H
+          DCR B
+          JNZ LOOP
+          MOV A, C
+          OUT 80H
+          HLT
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+	START:
+A -> 00H
+B -> 05H
+C -> 00H
+HL -> 0x1260 [H -> 0x12 L -> 0x60]
+
+	LOOP:
+A -> 56H [From M]
+56H & 80H -> 00H
+FLAGS: CY->0, S->0, Z->1
+A -> 56H [From M]
+A -> 56H + 00H -> 56H
+C -> 56H [From A]
+
+	SKP+VE:
+HL -> 0x1261 [0x1260 + 0x01]
+B -> 05H - 01H -> 04H
+
+	LOOP:
+A -> A9H [From M]
+A9H & 80H -> 80H
+
+	SKP+VE:
+HL -> 0x1262 [0x1261 + 0x01]
+B -> 04H - 01H -> 03H
+
+	LOOP:
+A -> 73H [From M]
+73H & 80H -> 00H
+FLAGS: CY->0, S->0, Z->1
+A -> 73H [From M]
+A -> 73H + 56H -> C9H
+C -> C9H [From A]
+
+	SKP+VE:
+HL -> 0x1263 [0x1262 + 0x01]
+B -> 03H - 01H -> 02H
+
+	LOOP:
+A -> 82H [From M]
+82H & 80H -> 80H
+
+	SKP+VE:
+HL -> 0x1264 [0x1263 + 0x01]
+B -> 02H - 01H -> 01H
+
+	LOOP:
+A -> 00H [From M]
+00H & 80H -> 00H
+FLAGS: CY->0, S->0, Z->1
+A -> 00H [From M]
+A -> 00H + C9H -> C9H
+C -> C9H [From A]
+
+	SKP+VE:
+HL -> 0x1265 [0x1264 + 0x01]
+B -> 01H - 01H -> 00H
+A -> C9H [From C]
+80H: C9H
+#+end_example
+
+** WAP to count even or odd numbers among 10 bytes of data stored in memory.
+*** Load memory
+#+begin_src 8085 :export both :args -db /tmp/8085-session8
+          MVI A 01H                       ; A = 01H
+          LXI H 1960H                     ; HL->1960
+          MVI B 09H                       ; B -> 05H
+  LOOP:   MOV M, A                        ; M -> A
+          ADI 01H                         ; A -> A + 1
+          INX H                           ; HL -> 1961
+  CHECK:  DCR B                           ; B -> B - 1
+          JNZ LOOP                        ; goto loop until B is zero
+          MVI M, FF                       ; HL [1969] -> FF
+          HLT                             ; Halt
+#+end_src
+
+#+RESULTS:
+#+begin_example
+A -> 01H
+HL -> 0x1960 [H -> 0x19 L -> 0x60]
+B -> 09H
+
+	LOOP:
+M -> 01H [From A]
+A -> 01H + 01H -> 02H
+HL -> 0x1961 [0x1960 + 0x01]
+
+	CHECK:
+B -> 09H - 01H -> 08H
+
+	LOOP:
+M -> 02H [From A]
+A -> 02H + 01H -> 03H
+HL -> 0x1962 [0x1961 + 0x01]
+
+	CHECK:
+B -> 08H - 01H -> 07H
+
+	LOOP:
+M -> 03H [From A]
+A -> 03H + 01H -> 04H
+HL -> 0x1963 [0x1962 + 0x01]
+
+	CHECK:
+B -> 07H - 01H -> 06H
+
+	LOOP:
+M -> 04H [From A]
+A -> 04H + 01H -> 05H
+HL -> 0x1964 [0x1963 + 0x01]
+
+	CHECK:
+B -> 06H - 01H -> 05H
+
+	LOOP:
+M -> 05H [From A]
+A -> 05H + 01H -> 06H
+HL -> 0x1965 [0x1964 + 0x01]
+
+	CHECK:
+B -> 05H - 01H -> 04H
+
+	LOOP:
+M -> 06H [From A]
+A -> 06H + 01H -> 07H
+HL -> 0x1966 [0x1965 + 0x01]
+
+	CHECK:
+B -> 04H - 01H -> 03H
+
+	LOOP:
+M -> 07H [From A]
+A -> 07H + 01H -> 08H
+HL -> 0x1967 [0x1966 + 0x01]
+
+	CHECK:
+B -> 03H - 01H -> 02H
+
+	LOOP:
+M -> 08H [From A]
+A -> 08H + 01H -> 09H
+HL -> 0x1968 [0x1967 + 0x01]
+
+	CHECK:
+B -> 02H - 01H -> 01H
+
+	LOOP:
+M -> 09H [From A]
+A -> 09H + 01H -> 0AH
+HL -> 0x1969 [0x1968 + 0x01]
+
+	CHECK:
+B -> 01H - 01H -> 00H
+M -> FFH
+#+end_example
+
+*** Program
+**** Inspect
+#+begin_src 8085 :export both :args -db /tmp/8085-session8
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x0a
+	B: 0x00
+	C: 0x00
+	D: 0x00
+	E: 0x00
+	H: 0x19
+	L: 0x69
+	M: 0xff
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x1960: 0x01
+	0x1961: 0x02
+	0x1962: 0x03
+	0x1963: 0x04
+	0x1964: 0x05
+	0x1965: 0x06
+	0x1966: 0x07
+	0x1967: 0x08
+	0x1968: 0x09
+	0x1969: 0xff
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+**** Code
+#+begin_src 8085 :export both :args -db /tmp/8085-session8
+  START:  LXI H 1960              ; H -> 1960
+          MVI B 0AH               ; B -> 0A (counter)
+          MVI C 00H               ; Even counter
+  LOOP:   MOV A, M                ; A -> M -> [1960]
+          RRC
+          JC SKPEVN
+          INR C
+  SKPEVN: INX H
+          DCR B
+          JNZ LOOP
+  FINISH: MOV A, C
+          OUT PORT1
+          HLT
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+          START:
+  HL -> 0x1960 [H -> 0x19 L -> 0x60]
+  B -> 0AH
+  C -> 00H
+
+          LOOP:
+  A -> 01H [From M]
+  01H >> 1 -> 00H
+  FLAGS: CY->1, S->0, Z->1
+
+          SKPEVN:
+  HL -> 0x1961 [0x1960 + 0x01]
+  B -> 0AH - 01H -> 09H
+
+          LOOP:
+  A -> 02H [From M]
+  02H >> 1 -> 01H
+  FLAGS: CY->0, S->0, Z->0
+  C -> 00H + 01H -> 01H
+
+          SKPEVN:
+  HL -> 0x1962 [0x1961 + 0x01]
+  B -> 09H - 01H -> 08H
+
+          LOOP:
+  A -> 03H [From M]
+  03H >> 1 -> 01H
+  FLAGS: CY->1, S->0, Z->0
+
+          SKPEVN:
+  HL -> 0x1963 [0x1962 + 0x01]
+  B -> 08H - 01H -> 07H
+
+          LOOP:
+  A -> 04H [From M]
+  04H >> 1 -> 02H
+  FLAGS: CY->0, S->0, Z->0
+  C -> 01H + 01H -> 02H
+
+          SKPEVN:
+  HL -> 0x1964 [0x1963 + 0x01]
+  B -> 07H - 01H -> 06H
+
+          LOOP:
+  A -> 05H [From M]
+  05H >> 1 -> 02H
+  FLAGS: CY->1, S->0, Z->0
+
+          SKPEVN:
+  HL -> 0x1965 [0x1964 + 0x01]
+  B -> 06H - 01H -> 05H
+
+          LOOP:
+  A -> 06H [From M]
+  06H >> 1 -> 03H
+  FLAGS: CY->0, S->0, Z->0
+  C -> 02H + 01H -> 03H
+
+          SKPEVN:
+  HL -> 0x1966 [0x1965 + 0x01]
+  B -> 05H - 01H -> 04H
+
+          LOOP:
+  A -> 07H [From M]
+  07H >> 1 -> 03H
+  FLAGS: CY->1, S->0, Z->0
+
+          SKPEVN:
+  HL -> 0x1967 [0x1966 + 0x01]
+  B -> 04H - 01H -> 03H
+
+          LOOP:
+  A -> 08H [From M]
+  08H >> 1 -> 04H
+  FLAGS: CY->0, S->0, Z->0
+  C -> 03H + 01H -> 04H
+
+          SKPEVN:
+  HL -> 0x1968 [0x1967 + 0x01]
+  B -> 03H - 01H -> 02H
+
+          LOOP:
+  A -> 09H [From M]
+  09H >> 1 -> 04H
+  FLAGS: CY->1, S->0, Z->0
+
+          SKPEVN:
+  HL -> 0x1969 [0x1968 + 0x01]
+  B -> 02H - 01H -> 01H
+
+          LOOP:
+  A -> FFH [From M]
+  FFH >> 1 -> 7FH
+  FLAGS: CY->1, S->0, Z->0
+
+          SKPEVN:
+  HL -> 0x196a [0x1969 + 0x01]
+  B -> 01H - 01H -> 00H
+
+          FINISH:
+  A -> 04H [From C]
+  PORT1: 04H
+#+end_example
+
+** WAP to count the no. of 1 present in a byte, assume any byte.
+#+begin_src 8085 :export both :args -db /tmp/8085-session9
+  START:  MVI A 99H               ; A -> 99 (1001 1001)
+          MVI B 08H               ; B -> 08 (counter)
+          MVI C 00H               ; C -> 0 (no of 1)
+  LOOP:   RRC
+          JNC SKP
+          INR C
+  SKP:    DCR B
+          JNZ LOOP
+  FINISH: MOV A, C                ; A -> C
+          HLT
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+	START:
+A -> 99H
+B -> 08H
+C -> 00H
+
+	LOOP:
+99H >> 1 -> 4CH
+FLAGS: CY->1, S->0, Z->0
+C -> 00H + 01H -> 01H
+
+	SKP:
+B -> 08H - 01H -> 07H
+
+	LOOP:
+4CH >> 1 -> 26H
+FLAGS: CY->0, S->0, Z->0
+
+	SKP:
+B -> 07H - 01H -> 06H
+
+	LOOP:
+26H >> 1 -> 13H
+FLAGS: CY->0, S->0, Z->0
+
+	SKP:
+B -> 06H - 01H -> 05H
+
+	LOOP:
+13H >> 1 -> 09H
+FLAGS: CY->1, S->0, Z->0
+C -> 01H + 01H -> 02H
+
+	SKP:
+B -> 05H - 01H -> 04H
+
+	LOOP:
+09H >> 1 -> 04H
+FLAGS: CY->1, S->0, Z->0
+C -> 02H + 01H -> 03H
+
+	SKP:
+B -> 04H - 01H -> 03H
+
+	LOOP:
+04H >> 1 -> 02H
+FLAGS: CY->0, S->0, Z->0
+
+	SKP:
+B -> 03H - 01H -> 02H
+
+	LOOP:
+02H >> 1 -> 01H
+FLAGS: CY->0, S->0, Z->0
+
+	SKP:
+B -> 02H - 01H -> 01H
+
+	LOOP:
+01H >> 1 -> 00H
+FLAGS: CY->1, S->0, Z->1
+C -> 03H + 01H -> 04H
+
+	SKP:
+B -> 01H - 01H -> 00H
+
+	FINISH:
+A -> 04H [From C]
+#+end_example
+
+** Transfer ten bytes data from 5050H to 5060H only if data is between 30H and 70H else store 00H in the next table.
+*** Load memory
+#+begin_src 8085 :export both :args -db /tmp/8085-session10
+          ;MVI A 2dH
+          ;LXI H 5050H
+          MVI A 6dH
+          LXI H 5055H
+          MVI B 05H                       ; B -> 0AH
+  LOOP:   MOV M, A                        ; M -> A
+          ADI 01H                         ; A -> A + 1
+          INX H
+  CHECK:  DCR B                           ; B -> B - 1
+          JNZ LOOP                        ; goto loop until B is zero
+          HLT                             ; Halt
+#+end_src
+
+#+RESULTS:
+#+begin_example
+A -> 6DH
+HL -> 0x5055 [H -> 0x50 L -> 0x55]
+B -> 05H
+
+	LOOP:
+M -> 6DH [From A]
+A -> 6DH + 01H -> 6EH
+HL -> 0x5056 [0x5055 + 0x01]
+
+	CHECK:
+B -> 05H - 01H -> 04H
+
+	LOOP:
+M -> 6EH [From A]
+A -> 6EH + 01H -> 6FH
+HL -> 0x5057 [0x5056 + 0x01]
+
+	CHECK:
+B -> 04H - 01H -> 03H
+
+	LOOP:
+M -> 6FH [From A]
+A -> 6FH + 01H -> 70H
+HL -> 0x5058 [0x5057 + 0x01]
+
+	CHECK:
+B -> 03H - 01H -> 02H
+
+	LOOP:
+M -> 70H [From A]
+A -> 70H + 01H -> 71H
+HL -> 0x5059 [0x5058 + 0x01]
+
+	CHECK:
+B -> 02H - 01H -> 01H
+
+	LOOP:
+M -> 71H [From A]
+A -> 71H + 01H -> 72H
+HL -> 0x505a [0x5059 + 0x01]
+
+	CHECK:
+B -> 01H - 01H -> 00H
+#+end_example
+
+*** Program
+**** Inspect
+#+begin_src 8085 :export both :args -db /tmp/8085-session10
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x72
+	B: 0x00
+	C: 0x00
+	D: 0x00
+	E: 0x00
+	H: 0x50
+	L: 0x5a
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x5050: 0x2d
+	0x5051: 0x2e
+	0x5052: 0x2f
+	0x5053: 0x30
+	0x5054: 0x31
+	0x5055: 0x6d
+	0x5056: 0x6e
+	0x5057: 0x6f
+	0x5058: 0x70
+	0x5059: 0x71
+	0x505a: 0x00
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+**** Code
+#+begin_src 8085 :export both :args -db /tmp/8085-session10
+  START:  LXI D 5050H             ; DE -> 5050H
+          LXI H 5060H             ; HL -> 5060H
+          MVI B 0AH               ; B -> 0A (counter)
+  F30H:   LDAX D                  ; A -> [DE]
+          CPI 30H                 ; A - 30H (compare)
+          JC SKP                  ; A < 30H skip
+  F70H:   CPI 70H                 ; A - 70H (compare)
+          JNC SKP                 ; A > 70H skip
+          MOV M, A                ; copy A to M [HL]
+          INX H                   ; Increase HL
+  SKP:    INX D                   ; Increase DE
+          DCR B                   ; B -> B -1
+          JNZ F30H                ; loop until B is 0
+          HLT                     ; halt
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+	START:
+DE -> 0x5050 [D -> 0x50 E -> 0x50]
+HL -> 0x5060 [H -> 0x50 L -> 0x60]
+B -> 0AH
+
+	F30H:
+A -> 2DH  ; FROM DE -> [0x5050]
+[A] 2DH - 30H -> 3H
+FLAGS: CY->1, S->1, Z->0
+
+	SKP:
+DE -> 0x5051 [0x5050 + 0x01]
+B -> 0AH - 01H -> 09H
+
+	F30H:
+A -> 2EH  ; FROM DE -> [0x5051]
+[A] 2EH - 30H -> 2H
+FLAGS: CY->1, S->1, Z->0
+
+	SKP:
+DE -> 0x5052 [0x5051 + 0x01]
+B -> 09H - 01H -> 08H
+
+	F30H:
+A -> 2FH  ; FROM DE -> [0x5052]
+[A] 2FH - 30H -> 1H
+FLAGS: CY->1, S->1, Z->0
+
+	SKP:
+DE -> 0x5053 [0x5052 + 0x01]
+B -> 08H - 01H -> 07H
+
+	F30H:
+A -> 30H  ; FROM DE -> [0x5053]
+[A] 30H - 30H -> 0H
+FLAGS: CY->0, S->0, Z->1
+
+	F70H:
+[A] 30H - 70H -> 40H
+FLAGS: CY->1, S->1, Z->0
+M -> 30H [From A]
+HL -> 0x5061 [0x5060 + 0x01]
+
+	SKP:
+DE -> 0x5054 [0x5053 + 0x01]
+B -> 07H - 01H -> 06H
+
+	F30H:
+A -> 31H  ; FROM DE -> [0x5054]
+[A] 31H - 30H -> 1H
+FLAGS: CY->0, S->0, Z->0
+
+	F70H:
+[A] 31H - 70H -> 3FH
+FLAGS: CY->1, S->1, Z->0
+M -> 31H [From A]
+HL -> 0x5062 [0x5061 + 0x01]
+
+	SKP:
+DE -> 0x5055 [0x5054 + 0x01]
+B -> 06H - 01H -> 05H
+
+	F30H:
+A -> 6DH  ; FROM DE -> [0x5055]
+[A] 6DH - 30H -> 3DH
+FLAGS: CY->0, S->0, Z->0
+
+	F70H:
+[A] 6DH - 70H -> 3H
+FLAGS: CY->1, S->1, Z->0
+M -> 6DH [From A]
+HL -> 0x5063 [0x5062 + 0x01]
+
+	SKP:
+DE -> 0x5056 [0x5055 + 0x01]
+B -> 05H - 01H -> 04H
+
+	F30H:
+A -> 6EH  ; FROM DE -> [0x5056]
+[A] 6EH - 30H -> 3EH
+FLAGS: CY->0, S->0, Z->0
+
+	F70H:
+[A] 6EH - 70H -> 2H
+FLAGS: CY->1, S->1, Z->0
+M -> 6EH [From A]
+HL -> 0x5064 [0x5063 + 0x01]
+
+	SKP:
+DE -> 0x5057 [0x5056 + 0x01]
+B -> 04H - 01H -> 03H
+
+	F30H:
+A -> 6FH  ; FROM DE -> [0x5057]
+[A] 6FH - 30H -> 3FH
+FLAGS: CY->0, S->0, Z->0
+
+	F70H:
+[A] 6FH - 70H -> 1H
+FLAGS: CY->1, S->1, Z->0
+M -> 6FH [From A]
+HL -> 0x5065 [0x5064 + 0x01]
+
+	SKP:
+DE -> 0x5058 [0x5057 + 0x01]
+B -> 03H - 01H -> 02H
+
+	F30H:
+A -> 70H  ; FROM DE -> [0x5058]
+[A] 70H - 30H -> 40H
+FLAGS: CY->0, S->0, Z->0
+
+	F70H:
+[A] 70H - 70H -> 0H
+FLAGS: CY->0, S->0, Z->1
+
+	SKP:
+DE -> 0x5059 [0x5058 + 0x01]
+B -> 02H - 01H -> 01H
+
+	F30H:
+A -> 71H  ; FROM DE -> [0x5059]
+[A] 71H - 30H -> 41H
+FLAGS: CY->0, S->0, Z->0
+
+	F70H:
+[A] 71H - 70H -> 1H
+FLAGS: CY->0, S->0, Z->0
+
+	SKP:
+DE -> 0x505a [0x5059 + 0x01]
+B -> 01H - 01H -> 00H
+#+end_example
+
+**** Inspect
+#+begin_src 8085 :export both :args -db /tmp/8085-session10
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x71
+	B: 0x00
+	C: 0x00
+	D: 0x50
+	E: 0x5a
+	H: 0x50
+	L: 0x65
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x5050: 0x2d
+	0x5051: 0x2e
+	0x5052: 0x2f
+	0x5053: 0x30
+	0x5054: 0x31
+	0x5055: 0x6d
+	0x5056: 0x6e
+	0x5057: 0x6f
+	0x5058: 0x70
+	0x5059: 0x71
+	0x505a: 0x00
+	0x5060: 0x30
+	0x5061: 0x31
+	0x5062: 0x6d
+	0x5063: 0x6e
+	0x5064: 0x6f
+	0x5065: 0x00
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
