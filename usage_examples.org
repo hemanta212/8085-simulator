@@ -403,6 +403,44 @@ For other we have to manually load the value to Accumulator
 : A -> 0AH  ; FROM DE -> [0x1260]
 : A: 0AH
 
+** ANI
+#+begin_src 8085 :export both :args -db /tmp/8085-session1
+  MVI A 79H
+  ANI 80H
+  OUT A
+  MVI A 90H
+  ANI 80H
+#+end_src
+
+#+RESULTS:
+: A -> 79H
+: 79H & 80H -> 00H
+: FLAGS: CY->0, S->0, Z->1
+: A: 00H
+: A -> 90H
+: 90H & 80H -> 80H
+
+** ORI
+#+begin_src 8085 :export both :args -db /tmp/8085-session1
+  MVI A 02H
+  ORI 01H
+  OUT A
+  MVI A 02H
+  ORI 05H
+  MVI A 0H
+  ORI 0H
+#+end_src
+
+#+RESULTS:
+: A -> 02H
+: 02H | 01H -> 03H
+: A: 03H
+: A -> 02H
+: 02H | 05H -> 07H
+: A -> 00H
+: 00H | 00H -> 00H
+: FLAGS: CY->0, S->0, Z->1
+
 * Practice Problems
 ** Register setup from 1260 to 1264
 #+begin_src 8085 :args -db /tmp/8085-session1 :exports both

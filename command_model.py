@@ -242,6 +242,46 @@ class Command:
             f"\nFLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
         )
 
+    def and_immediate(self, args: tuple) -> None:
+        """
+        Bitwise Logical AND with accumulator and 8 byte data
+        """
+        logger.debug(f"AND Immediate: {args}")
+        value = args[0]
+        formatted_value = f"0x{int(value, 16):02x}"
+        acc_value = self.state.accumulator
+        result = int(acc_value, 16) & int(value, 16)
+        self.change_state_flags(zero=True if result == 0 else False)
+        self.state.accumulator = f"0x{result:02x}"
+        logger.debug(f"{value} AND {acc_value} -> {result}:{self.state.accumulator}")
+        print(
+            f"{hex_to_simple(acc_value)} & {hex_to_simple(formatted_value)} -> {hex_to_simple(self.state.accumulator)}"
+        )
+        if self.state.flags["zero"]:
+            print(
+                f"FLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
+            )
+
+    def or_immediate(self, args: tuple) -> None:
+        """
+        Bitwise Logical OR with accumulator and 8 byte data
+        """
+        logger.debug(f"OR Immediate: {args}")
+        value = args[0]
+        formatted_value = f"0x{int(value, 16):02x}"
+        acc_value = self.state.accumulator
+        result = int(acc_value, 16) | int(value, 16)
+        self.change_state_flags(zero=True if result == 0 else False)
+        self.state.accumulator = f"0x{result:02x}"
+        logger.debug(f"{value} OR {acc_value} -> {result}:{self.state.accumulator}")
+        print(
+            f"{hex_to_simple(acc_value)} & {hex_to_simple(formatted_value)} -> {hex_to_simple(self.state.accumulator)}"
+        )
+        if self.state.flags["zero"]:
+            print(
+                f"FLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
+            )
+
     def increment_register(self, args: tuple) -> None:
         """
         Increment a given register by 1

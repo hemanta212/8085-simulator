@@ -120,6 +120,20 @@ COMMANDS = {
             "value": "byte",
         },
     },
+    "ANI": {
+        "description": "And Immediate with Accumulator",
+        "function": "and_immediate",
+        "parameters": {
+            "value": "byte",
+        },
+    },
+    "ORI": {
+        "description": "OR Immediate with Accumulator",
+        "function": "or_immediate",
+        "parameters": {
+            "value": "byte",
+        },
+    },
     "LDAX": {
         "description": "Load accumulator from register pair",
         "function": "load_accumulator_from_register_pair",
