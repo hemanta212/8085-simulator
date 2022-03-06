@@ -162,11 +162,12 @@ class Command:
         """
         logger.debug(f"Add Immediate: {args}")
         value = args[0]
+        formatted_value = f"0x{int(value, 16):02x}"
         acc_value = self.state.accumulator
         self.__add(value)
         logger.debug(f"ADDED: {self.state.accumulator}")
         print(
-            f"A -> {hex_to_simple(acc_value)} + {hex_to_simple(value)} -> {hex_to_simple(self.state.accumulator)}\t"
+            f"A -> {hex_to_simple(acc_value)} + {hex_to_simple(formatted_value)} -> {hex_to_simple(self.state.accumulator)}\t"
         )
         flags = self.state.flags
         if flags["carry"] or flags["zero"] or flags["sign"]:
@@ -184,11 +185,12 @@ class Command:
         self.state.accumulator = result
 
         value = args[0]
+        formatted_value = f"0x{int(args[0], 16):02x}"
         logger.debug(
             f"Subtracted '{value}' from '{acc_value}': {self.state.accumulator}"
         )
         print(
-            f"A -> {hex_to_simple(acc_value)} - {hex_to_simple(value)} -> {hex_to_simple(self.state.accumulator)}"
+            f"A -> {hex_to_simple(acc_value)} - {hex_to_simple(formatted_value)} -> {hex_to_simple(self.state.accumulator)}"
             f"\nFLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
         )
 
@@ -217,12 +219,13 @@ class Command:
         """
         logger.debug(f"Sub Immediate: {args}")
         value = args[0]
+        formatted_value = f"0x{int(value, 16):02x}"
         acc_value = self.state.accumulator
 
         result = self.__compare_sub_immediate(args)
         logger.debug(f"Compared '{value}' from '{acc_value}': {result}")
         print(
-            f"[A] {hex_to_simple(acc_value)} - {hex_to_simple(value)} -> {hex_to_simple(result)}"
+            f"[A] {hex_to_simple(acc_value)} - {hex_to_simple(formatted_value)} -> {hex_to_simple(result)}"
             f"\nFLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
         )
 
@@ -275,7 +278,7 @@ class Command:
         self.state.accumulator = f"0x{result:02x}"
         logger.debug(f"{value} OR {acc_value} -> {result}:{self.state.accumulator}")
         print(
-            f"{hex_to_simple(acc_value)} & {hex_to_simple(formatted_value)} -> {hex_to_simple(self.state.accumulator)}"
+            f"{hex_to_simple(acc_value)} | {hex_to_simple(formatted_value)} -> {hex_to_simple(self.state.accumulator)}"
         )
         if self.state.flags["zero"]:
             print(
