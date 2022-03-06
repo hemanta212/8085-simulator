@@ -48,17 +48,21 @@ class Command:
 
     def eval(self):
         """
-        Get function str from coomand and convert it to self function and call it with args
+        Get function str from command and convert it to self function and call it with args
         """
         logger.debug("Evaluating command: " + str(self))
         func = COMMANDS[self.name]["function"]
+        params = COMMANDS[self.name]["parameters"]
         class_func = getattr(self, func)
-        return class_func(self.args)
+        if not params:
+            return class_func()
+        else:
+            return class_func(self.args)
 
     def inspect(self) -> None:
         self.state.inspect()
 
-    def halt(self, args: tuple) -> None:
+    def halt(self) -> None:
         logger.debug("HLT received.")
         return
 
