@@ -17,16 +17,30 @@
   - [[#out][OUT]]
   - [[#lxi][LXI]]
   - [[#inxdcx][INX/DCX]]
+  - [[#stax][STAX]]
   - [[#ldax][LDAX]]
+  - [[#ani][ANI]]
+  - [[#ori][ORI]]
+  - [[#rrc][RRC]]
+  - [[#rlc][RLC]]
 - [[#practice-problems][Practice Problems]]
   - [[#register-setup-from-1260-to-1264][Register setup from 1260 to 1264]]
-  - [[#simple][SIMPLE]]
+  - [[#simple][Simple]]
   - [[#memory-dynamic][Memory dynamic]]
+  - [[#wap-to-add-10-bytes-of-data-and-store-the-16-bit-result-at-the-end-of-memory-address][WAP to add 10 bytes of data and store the 16-bit result at the end of memory address.]]
+  - [[#wap-to-transfer-20-bytes-of-data-stored-in-memory-having-starting-address-2012h-to-the-memory-having-starting-address-of-8000h-in-reverse-order][WAP to transfer 20 bytes of data stored in memory having starting address 2012H to the memory having starting address of 8000H in reverse order.]]
+  - [[#wap-to-multiply-the-10h-and-14h-and-show-the-16-bit-result-through-any-port][WAP to multiply the 10H and 14H and show the 16 bit result through any port]]
+  - [[#wap-to-count-the-positive-and-negative-numbers-among-20-bytes-of-data][WAP to count the positive and negative numbers among 20 bytes of data]]
+  - [[#there-are-two-tables-with-10-byte-data-each-wap-to-add-correspoding-nums-and-show-result-at-port-00h][There are two tables with 10 byte data each, WAP to add correspoding nums and show result at port 00H]]
+  - [[#there-are-10-numbers-in-memory-wap-to-add-only-positive-numbers-and-show-the-result-at-output-ports-80h][There are 10 numbers in memory. WAP to add only positive numbers and show the result at output ports 80H.]]
+  - [[#wap-to-count-even-or-odd-numbers-among-10-bytes-of-data-stored-in-memory][WAP to count even or odd numbers among 10 bytes of data stored in memory.]]
+  - [[#wap-to-count-the-no-of-1-present-in-a-byte-assume-any-byte][WAP to count the no. of 1 present in a byte, assume any byte.]]
+  - [[#transfer-ten-bytes-data-from-5050h-to-5060h-only-if-data-is-between-30h-and-70h-else-store-00h-in-the-next-table][Transfer ten bytes data from 5050H to 5060H only if data is between 30H and 70H else store 00H in the next table.]]
 :END:
 
 * Commands
 #+begin_src shell :exports none
-rm -rf /tmp/8085-session{1,2,3}
+rm -rf /tmp/8085-session{1..1000}
 #+end_src
 
 #+RESULTS:
@@ -66,7 +80,6 @@ Flags:
 #+end_src
 
 #+RESULTS:
-: A -> 03H
 
 #+begin_src 8085 :args -db /tmp/8085-session1 :exports both
   inspect
@@ -103,8 +116,6 @@ Flags:
 #+end_src
 
 #+RESULTS:
-: B -> 03H [From A]
-: C -> 03H [From A]
 
 ** ADD/ADI
 #+begin_src 8085 :args -db /tmp/8085-session1 :exports both
@@ -115,8 +126,8 @@ inspect
 #+begin_example
 Registers:
 	A: 0x03
-	B: 0x03
-	C: 0x03
+	B: 0x00
+	C: 0x00
 	D: 0x00
 	E: 0x00
 	H: 0x00
@@ -140,7 +151,7 @@ ADD B
 #+end_src
 
 #+RESULTS:
-: A -> 03H + 03H -> 06H
+: A -> 03H + 00H -> 03H
 
 #+begin_src 8085 :export both :args -db /tmp/8085-session1
   MVI A ff;
@@ -162,9 +173,9 @@ ADD B
 
 #+RESULTS:
 : A -> 03H
-: A - B -> 03H - 03H -> 00H
-: FLAGS: CY->0, S->0, Z->1
-: A -> 00H - 04H -> 04H
+: A - B -> 03H - 00H -> 03H
+: FLAGS: CY->0, S->0, Z->0
+: A -> 03H - 04H -> 01H
 : FLAGS: CY->1, S->1, Z->0
 : A -> 06H
 
@@ -205,7 +216,7 @@ CPI 0b
 #+end_src
 
 #+RESULTS:
-: A - B -> 0AH - 03H -> 7H
+: A - B -> 0AH - 00H -> AH
 : FLAGS: CY->0, S->0, Z->0
 : [A] 0AH - 0BH -> 1H
 : FLAGS: CY->1, S->1, Z->0
@@ -232,7 +243,7 @@ inspect
 #+begin_example
 Registers:
 	A: 0x0a
-	B: 0x03
+	B: 0x00
 	C: 0x0c
 	D: 0x00
 	E: 0x00
@@ -268,7 +279,7 @@ STA 3344H
 #+begin_example
 Registers:
 	A: 0x0a
-	B: 0x03
+	B: 0x00
 	C: 0x0c
 	D: 0x00
 	E: 0x00
@@ -311,7 +322,7 @@ DCR B
 #+end_src
 
 #+RESULTS:
-: B -> 03H - 01H -> 02H
+: B -> 00H - 01H -> 01H
 
 ** OUT
 #+begin_src 8085 :args -db /tmp/8085-session1 :exports both
@@ -339,7 +350,7 @@ inspect
 #+begin_example
 Registers:
 	A: 0x01
-	B: 0x02
+	B: 0x01
 	C: 0x0c
 	D: 0x00
 	E: 0x00
@@ -446,14 +457,47 @@ For other we have to manually load the value to Accumulator
   MVI A 02H
   RRC
   RRC
+  MVI A 02H
+  RRC
 #+end_src
 
 #+RESULTS:
 : A -> 02H
-: 02H >> 1 -> 01H
+: 2H >> 1 -> 01H
 : FLAGS: CY->0, S->0, Z->0
-: 01H >> 1 -> 00H
-: FLAGS: CY->1, S->0, Z->1
+: 1H >> 1 -> 80H
+: FLAGS: CY->1, S->0, Z->0
+: A -> 02H
+: 2H >> 1 -> 01H
+: FLAGS: CY->0, S->0, Z->0
+
+** RLC
+#+begin_src 8085 :export both :args -db /tmp/8085-session1
+  MVI A 80
+  RLC
+  MVI A 81
+  RLC
+  MVI A 41H
+  RLC
+  MVI A 1H
+  RLC
+#+end_src
+
+#+RESULTS:
+#+begin_example
+A -> 80H
+80H << 1 -> 01H
+FLAGS: CY->1, S->0, Z->0
+A -> 81H
+81H << 1 -> 03H
+FLAGS: CY->1, S->0, Z->0
+A -> 41H
+41H << 1 -> 82H
+FLAGS: CY->0, S->1, Z->0
+A -> 01H
+1H << 1 -> 02H
+FLAGS: CY->0, S->0, Z->0
+#+end_example
 
 * Practice Problems
 ** Register setup from 1260 to 1264
@@ -484,7 +528,7 @@ A -> 04H
 1264H -> 04H
 #+end_example
 
-** SIMPLE
+** Simple
 #+begin_src 8085 :args -db /tmp/8085-session1 :exports both
 inspect
 #+end_src
@@ -493,7 +537,7 @@ inspect
 #+begin_example
 Registers:
 	A: 0x04
-	B: 0x02
+	B: 0x01
 	C: 0x0c
 	D: 0x12
 	E: 0x60
@@ -656,46 +700,920 @@ Flags:
   #+end_src
 
   #+RESULTS:
-  #+begin_example
-  B -> 04H
-  HL -> 0x1260 [H -> 0x12 L -> 0x60]
-  C -> 05H [From M]
-  HL -> 0x1261 [H -> 0x12 L -> 0x61]
 
-          FIRST:
-  A -> 01H [From M]
-  A - C -> 01H - 05H -> 4H
-  FLAGS: CY->1, S->1, Z->0
-  C -> 01H [From A]
+** WAP to add 10 bytes of data and store the 16-bit result at the end of memory address.
+*** Load memory
+#+begin_src 8085 :export both :args -db /tmp/8085-session2
+          MVI A 01H                       ; A = 01H
+          LXI H 1960H                     ; HL->1960
+          MVI B 09H                       ; B -> 05H
+  LOOP:   MOV M, A                        ; M -> A
+          ADI 01H                         ; A -> A + 1
+          INX H                           ; HL -> 1961
+  CHECK:  DCR B                           ; B -> B - 1
+          JNZ LOOP                        ; goto loop until B is zero
+          MVI M, FF                       ; HL [1969] -> FF
+          HLT                             ; Halt
+#+end_src
 
-          SECOND:
-  HL -> 0x1262 [0x1261 + 0x01]
-  B -> 04H - 01H -> 03H
+#+RESULTS:
 
-          FIRST:
-  A -> 02H [From M]
-  A - C -> 02H - 01H -> 1H
-  FLAGS: CY->0, S->0, Z->0
+*** Program
+**** Inspection
+#+begin_src 8085 :export both :args -db /tmp/8085-session2
+inspect
+#+end_src
 
-          SECOND:
-  HL -> 0x1263 [0x1262 + 0x01]
-  B -> 03H - 01H -> 02H
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x01
+	B: 0x09
+	C: 0x00
+	D: 0x00
+	E: 0x00
+	H: 0x19
+	L: 0x60
+	M: 0x00
 
-          FIRST:
-  A -> 03H [From M]
-  A - C -> 03H - 01H -> 2H
-  FLAGS: CY->0, S->0, Z->0
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x1960: 0x00
 
-          SECOND:
-  HL -> 0x1264 [0x1263 + 0x01]
-  B -> 02H - 01H -> 01H
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
 
-          FIRST:
-  A -> 04H [From M]
-  A - C -> 04H - 01H -> 3H
-  FLAGS: CY->0, S->0, Z->0
+**** Code
+#+begin_src 8085 :export both :args -db /tmp/8085-session2
+  START:  MVI A 0H                ; A -> 0 (sum)
+          MVI C 0H                ; C -> 0 (carry)
+          MVI B 0AH               ; B -> AH (counter)
+          LXI H 1960H             ; HL -> 1960
+  LOOP:   ADD M                   ; A = A + M
+          JNC NEXT
+          INR C
+  NEXT:   INX H                   ; HL -> 1961
+          DCR B                   ; B -> B -1
+          JNZ LOOP                ; goto loop until B -> 0
+  FINISH: MOV M, A                ; HL [1970]->A
+          INX H                   ; HL -> 1971
+          MOV M, C                ; HL [1971] -> C
+          HLT
+#+end_src
 
-          SECOND:
-  HL -> 0x1265 [0x1264 + 0x01]
-  B -> 01H - 01H -> 00H
-  #+end_example
+#+RESULTS:
+
+**** Inspection
+#+begin_src 8085 :export both :args -db /tmp/8085-session2
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x00
+	B: 0x00
+	C: 0x00
+	D: 0x00
+	E: 0x00
+	H: 0x19
+	L: 0x6a
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x1960: 0x00
+	0x1961: 0x00
+	0x1962: 0x00
+	0x1963: 0x00
+	0x1964: 0x00
+	0x1965: 0x00
+	0x1966: 0x00
+	0x1967: 0x00
+	0x1968: 0x00
+	0x1969: 0x00
+	0x196a: 0x00
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+** WAP to transfer 20 bytes of data stored in memory having starting address 2012H to the memory having starting address of 8000H in reverse order.
+*** Load memory
+#+begin_src 8085 :export both :args -db /tmp/8085-session3
+          MVI A 01H                       ; A = 01H
+          LXI H 2025H                     ; HL -> 2025 (2012 + 19)
+          MVI B 14H                       ; B -> 14H -> (dec: 20)
+  LOOP:   MOV M, A                        ; M -> A
+          ADI 01H                         ; A -> A + 1
+          DCX H                           ; HL -> 1961
+  CHECK:  DCR B                           ; B -> B - 1
+          JNZ LOOP                        ; goto loop until B is zero
+          HLT                             ; Halt
+#+end_src
+
+#+RESULTS:
+
+*** Program
+**** Inspection
+#+begin_src 8085 :export both :args -db /tmp/8085-session3
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x01
+	B: 0x14
+	C: 0x00
+	D: 0x00
+	E: 0x00
+	H: 0x20
+	L: 0x25
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x2025: 0x00
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+**** Code
+#+begin_src 8085 :export both :args -db /tmp/8085-session3
+  START:  LXI H 2025H            ; HL -> 2025
+          LXI D 8000H            ; DE -> 8000
+          MVI B 14H               ; B -> 14 (counter) (dec: 20)
+  LOOP:   MOV A, M                ; A -> M [2025]
+          STAX D                  ; DE [80000] -> A
+          DCX H                   ; HL -> 2024
+          INX D                   ; DE -> 8001
+  CHECK:  DCR B                   ; B -> B -1
+          JNZ LOOP                ; Keep looping until zero
+          HLT
+#+end_src
+
+#+RESULTS:
+
+**** Inspection
+#+begin_src 8085 :export both :args -db /tmp/8085-session3
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x01
+	B: 0x14
+	C: 0x00
+	D: 0x80
+	E: 0x00
+	H: 0x20
+	L: 0x25
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x2025: 0x00
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+** WAP to multiply the 10H and 14H and show the 16 bit result through any port
+#+begin_src 8085 :export both :args -db /tmp/8085-session4
+  START:  MVI A 0H               ; A -> 0H
+          MVI B 10H               ; B -> 10H (counter)
+          MVI C 00H               ; C -> 0H (carry)
+  LOOP:   ADI 14H                 ; A -> A + 14H
+          JNC CHECK               ; if no carry jump otherwise add to C
+          INR C                   ; C -> C + 1
+  CHECK:  DCR B                   ; B -> 0FH
+          JNZ LOOP                ; keep looping until 0
+  DSPLY:  OUT PORT1
+          MOV A, C                ; A -> C
+          OUT PORT2
+          HLT
+#+end_src
+
+#+RESULTS:
+
+** WAP to count the positive and negative numbers among 20 bytes of data
+*** Loading
+#+begin_src 8085 :export both :args -db /tmp/8085-session5
+  LXI H 1260
+  MVI M 56H
+  INX H
+  MVI M A9H
+  INX H
+  MVI M 73H
+  INX H
+  MVI M 82H
+  INX H
+  MVI M 0H
+#+end_src
+
+#+RESULTS:
+#+begin_example
+HL -> 0x1260 [H -> 0x12 L -> 0x60]
+M -> 56H
+HL -> 0x1261 [0x1260 + 0x01]
+M -> A9H
+HL -> 0x1262 [0x1261 + 0x01]
+M -> 73H
+HL -> 0x1263 [0x1262 + 0x01]
+M -> 82H
+HL -> 0x1264 [0x1263 + 0x01]
+M -> 00H
+#+end_example
+
+*** Program
+**** Inspect
+#+begin_src 8085 :export both :args -db /tmp/8085-session5
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x00
+	B: 0x00
+	C: 0x00
+	D: 0x00
+	E: 0x00
+	H: 0x12
+	L: 0x64
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x1260: 0x56
+	0x1261: 0xa9
+	0x1262: 0x73
+	0x1263: 0x82
+	0x1264: 0x00
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+**** Code
+#+begin_src 8085 :export both :args -db /tmp/8085-session5
+  START:  MVI A 00H               ; A -> 0H
+          MVI B 05H               ; B -> 05/14H (counter)
+          LXI H 1260H             ; HL -> 1260H
+          MVI C 00H               ; +ve counter
+          MVI D 00H               ; -ve counter
+  EVAL:   MOV A, M                ; A -> M -> [1260]
+          ANI 80H                 ; A & 80H
+          JZ SKPNEG               ; if MSB == 0
+          INR D                   ; MSB == 1 so -ve ++
+  SKPNEG: INX H                   ; HL -> 1261
+          DCR B                   ; B -> B -1
+          JNZ EVAL                ; eval until counter is 0
+          MVI A 05H               ; A -> 05H (total bytes)
+          SUB D                   ; A - D -> +ve count
+          MOV C, A                ; C -> A
+          HLT
+#+end_src
+
+#+RESULTS:
+
+** There are two tables with 10 byte data each, WAP to add correspoding nums and show result at port 00H
+*** Loading
+#+begin_src 8085 :export both :args -db /tmp/8085-session6
+  MVI A 01H
+  MVI B 05H
+  LXI H 1260H
+  LXI D 1364H
+  LOOP: MOV M, B
+        STAX D
+        INR A
+        INX H
+        DCX D
+  NEXT: DCR B
+        JNZ LOOP
+        HLT
+#+end_src
+
+#+RESULTS:
+
+*** Program
+**** Inspect
+#+begin_src 8085 :export both :args -db /tmp/8085-session6
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x01
+	B: 0x05
+	C: 0x00
+	D: 0x13
+	E: 0x64
+	H: 0x12
+	L: 0x60
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x1260: 0x00
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+**** Code
+#+begin_src 8085 :export both :args -db /tmp/8085-session6
+  START:  MVI A 00H               ; A -> 0H
+          LXI H 1260H
+          LXI D 1360H
+          MVI B 05H
+  LOOP:   LDAX D
+          ADD M
+          OUT 00H
+  NEXT:   INX D
+          INX H
+          DCR B
+          JNZ LOOP
+          HLT
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+	START:
+A -> 00H
+HL -> 0x1260 [H -> 0x12 L -> 0x60]
+DE -> 0x1360 [D -> 0x13 E -> 0x60]
+B -> 05H
+
+	LOOP:
+A -> 00H  ; FROM DE -> [0x1360]
+A -> 00H + 00H -> 00H
+FLAGS: CY->0, S->0, Z->1
+00H: 00H
+
+	NEXT:
+DE -> 0x1361 [0x1360 + 0x01]
+HL -> 0x1261 [0x1260 + 0x01]
+B -> 05H - 01H -> 04H
+
+	LOOP:
+A -> 00H  ; FROM DE -> [0x1361]
+A -> 00H + 00H -> 00H
+FLAGS: CY->0, S->0, Z->1
+00H: 00H
+
+	NEXT:
+DE -> 0x1362 [0x1361 + 0x01]
+HL -> 0x1262 [0x1261 + 0x01]
+B -> 04H - 01H -> 03H
+
+	LOOP:
+A -> 00H  ; FROM DE -> [0x1362]
+A -> 00H + 00H -> 00H
+FLAGS: CY->0, S->0, Z->1
+00H: 00H
+
+	NEXT:
+DE -> 0x1363 [0x1362 + 0x01]
+HL -> 0x1263 [0x1262 + 0x01]
+B -> 03H - 01H -> 02H
+
+	LOOP:
+A -> 00H  ; FROM DE -> [0x1363]
+A -> 00H + 00H -> 00H
+FLAGS: CY->0, S->0, Z->1
+00H: 00H
+
+	NEXT:
+DE -> 0x1364 [0x1363 + 0x01]
+HL -> 0x1264 [0x1263 + 0x01]
+B -> 02H - 01H -> 01H
+
+	LOOP:
+A -> 00H  ; FROM DE -> [0x1364]
+A -> 00H + 00H -> 00H
+FLAGS: CY->0, S->0, Z->1
+00H: 00H
+
+	NEXT:
+DE -> 0x1365 [0x1364 + 0x01]
+HL -> 0x1265 [0x1264 + 0x01]
+B -> 01H - 01H -> 00H
+#+end_example
+
+** There are 10 numbers in memory. WAP to add only positive numbers and show the result at output ports 80H.
+*** Loading
+#+begin_src 8085 :export both :args -db /tmp/8085-session7
+  LXI H 1260
+  MVI M 56H
+  INX H
+  MVI M A9H
+  INX H
+  MVI M 73H
+  INX H
+  MVI M 82H
+  INX H
+  MVI M 0H
+#+end_src
+
+#+RESULTS:
+#+begin_example
+HL -> 0x1260 [H -> 0x12 L -> 0x60]
+M -> 56H
+HL -> 0x1261 [0x1260 + 0x01]
+M -> A9H
+HL -> 0x1262 [0x1261 + 0x01]
+M -> 73H
+HL -> 0x1263 [0x1262 + 0x01]
+M -> 82H
+HL -> 0x1264 [0x1263 + 0x01]
+M -> 00H
+#+end_example
+*** Program
+#+begin_src 8085 :export both :args -db /tmp/8085-session7
+  START:  MVI A 00H
+          MVI B 05H               ; B -> 05/0AH
+          MVI C 00H               ; C-> 0H (Sum)
+          LXI H 1260H
+  LOOP:   MOV A, M
+          ANI 80H
+          JNZ SKP+VE
+          MOV A, M
+          ADD C
+          MOV C, A
+  SKP+VE: INX H
+          DCR B
+          JNZ LOOP
+          MOV A, C
+          OUT 80H
+          HLT
+#+end_src
+
+#+RESULTS:
+
+** WAP to count even or odd numbers among 10 bytes of data stored in memory.
+*** Load memory
+#+begin_src 8085 :export both :args -db /tmp/8085-session8
+          MVI A 01H                       ; A = 01H
+          LXI H 1960H                     ; HL->1960
+          MVI B 09H                       ; B -> 05H
+  LOOP:   MOV M, A                        ; M -> A
+          ADI 01H                         ; A -> A + 1
+          INX H                           ; HL -> 1961
+  CHECK:  DCR B                           ; B -> B - 1
+          JNZ LOOP                        ; goto loop until B is zero
+          MVI M, FF                       ; HL [1969] -> FF
+          HLT                             ; Halt
+#+end_src
+
+#+RESULTS:
+
+*** Program
+**** Inspect
+#+begin_src 8085 :export both :args -db /tmp/8085-session8
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x01
+	B: 0x09
+	C: 0x00
+	D: 0x00
+	E: 0x00
+	H: 0x19
+	L: 0x60
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x1960: 0x00
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+**** Code
+#+begin_src 8085 :export both :args -db /tmp/8085-session8
+  START:  LXI H 1960              ; H -> 1960
+          MVI B 0AH               ; B -> 0A (counter)
+          MVI C 00H               ; Even counter
+  LOOP:   MOV A, M                ; A -> M -> [1960]
+          RRC
+          JC SKPEVN
+          INR C
+  SKPEVN: INX H
+          DCR B
+          JNZ LOOP
+  FINISH: MOV A, C
+          OUT PORT1
+          HLT
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+	START:
+HL -> 0x1960 [H -> 0x19 L -> 0x60]
+B -> 0AH
+C -> 00H
+
+	LOOP:
+A -> 00H [From M]
+00H >> 1 -> 00H
+FLAGS: CY->0, S->0, Z->1
+C -> 00H + 01H -> 01H
+
+	SKPEVN:
+HL -> 0x1961 [0x1960 + 0x01]
+B -> 0AH - 01H -> 09H
+
+	LOOP:
+A -> 00H [From M]
+00H >> 1 -> 00H
+FLAGS: CY->0, S->0, Z->1
+C -> 01H + 01H -> 02H
+
+	SKPEVN:
+HL -> 0x1962 [0x1961 + 0x01]
+B -> 09H - 01H -> 08H
+
+	LOOP:
+A -> 00H [From M]
+00H >> 1 -> 00H
+FLAGS: CY->0, S->0, Z->1
+C -> 02H + 01H -> 03H
+
+	SKPEVN:
+HL -> 0x1963 [0x1962 + 0x01]
+B -> 08H - 01H -> 07H
+
+	LOOP:
+A -> 00H [From M]
+00H >> 1 -> 00H
+FLAGS: CY->0, S->0, Z->1
+C -> 03H + 01H -> 04H
+
+	SKPEVN:
+HL -> 0x1964 [0x1963 + 0x01]
+B -> 07H - 01H -> 06H
+
+	LOOP:
+A -> 00H [From M]
+00H >> 1 -> 00H
+FLAGS: CY->0, S->0, Z->1
+C -> 04H + 01H -> 05H
+
+	SKPEVN:
+HL -> 0x1965 [0x1964 + 0x01]
+B -> 06H - 01H -> 05H
+
+	LOOP:
+A -> 00H [From M]
+00H >> 1 -> 00H
+FLAGS: CY->0, S->0, Z->1
+C -> 05H + 01H -> 06H
+
+	SKPEVN:
+HL -> 0x1966 [0x1965 + 0x01]
+B -> 05H - 01H -> 04H
+
+	LOOP:
+A -> 00H [From M]
+00H >> 1 -> 00H
+FLAGS: CY->0, S->0, Z->1
+C -> 06H + 01H -> 07H
+
+	SKPEVN:
+HL -> 0x1967 [0x1966 + 0x01]
+B -> 04H - 01H -> 03H
+
+	LOOP:
+A -> 00H [From M]
+00H >> 1 -> 00H
+FLAGS: CY->0, S->0, Z->1
+C -> 07H + 01H -> 08H
+
+	SKPEVN:
+HL -> 0x1968 [0x1967 + 0x01]
+B -> 03H - 01H -> 02H
+
+	LOOP:
+A -> 00H [From M]
+00H >> 1 -> 00H
+FLAGS: CY->0, S->0, Z->1
+C -> 08H + 01H -> 09H
+
+	SKPEVN:
+HL -> 0x1969 [0x1968 + 0x01]
+B -> 02H - 01H -> 01H
+
+	LOOP:
+A -> 00H [From M]
+00H >> 1 -> 00H
+FLAGS: CY->0, S->0, Z->1
+C -> 09H + 01H -> 0AH
+
+	SKPEVN:
+HL -> 0x196a [0x1969 + 0x01]
+B -> 01H - 01H -> 00H
+
+	FINISH:
+A -> 0AH [From C]
+PORT1: 0AH
+#+end_example
+
+**** Inspect
+#+begin_src 8085 :export both :args -db /tmp/8085-session8
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x0a
+	B: 0x00
+	C: 0x0a
+	D: 0x00
+	E: 0x00
+	H: 0x19
+	L: 0x6a
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x1960: 0x00
+	0x1961: 0x00
+	0x1962: 0x00
+	0x1963: 0x00
+	0x1964: 0x00
+	0x1965: 0x00
+	0x1966: 0x00
+	0x1967: 0x00
+	0x1968: 0x00
+	0x1969: 0x00
+	0x196a: 0x00
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+** WAP to count the no. of 1 present in a byte, assume any byte.
+#+begin_src 8085 :export both :args -db /tmp/8085-session9
+  START:  MVI A 99H               ; A -> 99 (1001 1001)
+          MVI B 08H               ; B -> 08 (counter)
+          MVI C 00H               ; C -> 0 (no of 1)
+  LOOP:   RRC
+          JNC SKP
+          INR C
+  SKP:    DCR B
+          JNZ LOOP
+  FINISH: MOV A, C                ; A -> C
+          HLT
+#+end_src
+
+#+RESULTS:
+
+** Transfer ten bytes data from 5050H to 5060H only if data is between 30H and 70H else store 00H in the next table.
+*** Load memory
+#+begin_src 8085 :export both :args -db /tmp/8085-session10
+          ;MVI A 2dH
+          ;LXI H 5050H
+          MVI A 6dH
+          LXI H 5055H
+          MVI B 05H                       ; B -> 0AH
+  LOOP:   MOV M, A                        ; M -> A
+          ADI 01H                         ; A -> A + 1
+          INX H
+  CHECK:  DCR B                           ; B -> B - 1
+          JNZ LOOP                        ; goto loop until B is zero
+          HLT                             ; Halt
+#+end_src
+
+#+RESULTS:
+
+*** Program
+**** Inspect
+#+begin_src 8085 :export both :args -db /tmp/8085-session10
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x6d
+	B: 0x05
+	C: 0x00
+	D: 0x00
+	E: 0x00
+	H: 0x50
+	L: 0x55
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x5055: 0x00
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example
+
+**** Code
+#+begin_src 8085 :export both :args -db /tmp/8085-session10
+  START:  LXI D 5050H             ; DE -> 5050H
+          LXI H 5060H             ; HL -> 5060H
+          MVI B 0AH               ; B -> 0A (counter)
+  F30H:   LDAX D                  ; A -> [DE]
+          CPI 30H                 ; A - 30H (compare)
+          JC SKP                  ; A < 30H skip
+  F70H:   CPI 70H                 ; A - 70H (compare)
+          JNC SKP                 ; A > 70H skip
+          MOV M, A                ; copy A to M [HL]
+          INX H                   ; Increase HL
+  SKP:    INX D                   ; Increase DE
+          DCR B                   ; B -> B -1
+          JNZ F30H                ; loop until B is 0
+          HLT                     ; halt
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+	START:
+DE -> 0x5050 [D -> 0x50 E -> 0x50]
+HL -> 0x5060 [H -> 0x50 L -> 0x60]
+B -> 0AH
+
+	F30H:
+A -> 00H  ; FROM DE -> [0x5050]
+[A] 00H - 30H -> 30H
+FLAGS: CY->1, S->1, Z->0
+
+	SKP:
+DE -> 0x5051 [0x5050 + 0x01]
+B -> 0AH - 01H -> 09H
+
+	F30H:
+A -> 00H  ; FROM DE -> [0x5051]
+[A] 00H - 30H -> 30H
+FLAGS: CY->1, S->1, Z->0
+
+	SKP:
+DE -> 0x5052 [0x5051 + 0x01]
+B -> 09H - 01H -> 08H
+
+	F30H:
+A -> 00H  ; FROM DE -> [0x5052]
+[A] 00H - 30H -> 30H
+FLAGS: CY->1, S->1, Z->0
+
+	SKP:
+DE -> 0x5053 [0x5052 + 0x01]
+B -> 08H - 01H -> 07H
+
+	F30H:
+A -> 00H  ; FROM DE -> [0x5053]
+[A] 00H - 30H -> 30H
+FLAGS: CY->1, S->1, Z->0
+
+	SKP:
+DE -> 0x5054 [0x5053 + 0x01]
+B -> 07H - 01H -> 06H
+
+	F30H:
+A -> 00H  ; FROM DE -> [0x5054]
+[A] 00H - 30H -> 30H
+FLAGS: CY->1, S->1, Z->0
+
+	SKP:
+DE -> 0x5055 [0x5054 + 0x01]
+B -> 06H - 01H -> 05H
+
+	F30H:
+A -> 00H  ; FROM DE -> [0x5055]
+[A] 00H - 30H -> 30H
+FLAGS: CY->1, S->1, Z->0
+
+	SKP:
+DE -> 0x5056 [0x5055 + 0x01]
+B -> 05H - 01H -> 04H
+
+	F30H:
+A -> 00H  ; FROM DE -> [0x5056]
+[A] 00H - 30H -> 30H
+FLAGS: CY->1, S->1, Z->0
+
+	SKP:
+DE -> 0x5057 [0x5056 + 0x01]
+B -> 04H - 01H -> 03H
+
+	F30H:
+A -> 00H  ; FROM DE -> [0x5057]
+[A] 00H - 30H -> 30H
+FLAGS: CY->1, S->1, Z->0
+
+	SKP:
+DE -> 0x5058 [0x5057 + 0x01]
+B -> 03H - 01H -> 02H
+
+	F30H:
+A -> 00H  ; FROM DE -> [0x5058]
+[A] 00H - 30H -> 30H
+FLAGS: CY->1, S->1, Z->0
+
+	SKP:
+DE -> 0x5059 [0x5058 + 0x01]
+B -> 02H - 01H -> 01H
+
+	F30H:
+A -> 00H  ; FROM DE -> [0x5059]
+[A] 00H - 30H -> 30H
+FLAGS: CY->1, S->1, Z->0
+
+	SKP:
+DE -> 0x505a [0x5059 + 0x01]
+B -> 01H - 01H -> 00H
+#+end_example
+
+**** Inspect
+#+begin_src 8085 :export both :args -db /tmp/8085-session10
+inspect
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Registers:
+	A: 0x00
+	B: 0x00
+	C: 0x00
+	D: 0x50
+	E: 0x5a
+	H: 0x50
+	L: 0x60
+	M: 0x00
+
+Memory:
+	0x1000: 0x2b
+	0x1001: 0x34
+	0x0000: 0x00
+	0x5055: 0x00
+	0x5060: 0x00
+
+Flags:
+	carry: 0
+	auxillary_carry: 0
+	zero: 0
+	sign: 0
+#+end_example

@@ -120,11 +120,25 @@ COMMANDS = {
             "value": "byte",
         },
     },
+    "ANA": {
+        "description": "And Register with Accumulator",
+        "function": "and_accumulator",
+        "parameters": {
+            "register": REGISTERS,
+        },
+    },
     "ANI": {
         "description": "And Immediate with Accumulator",
         "function": "and_immediate",
         "parameters": {
             "value": "byte",
+        },
+    },
+    "ORA": {
+        "description": "OR register with Accumulator",
+        "function": "or_accumulator",
+        "parameters": {
+            "register": REGISTERS,
         },
     },
     "ORI": {
@@ -137,6 +151,11 @@ COMMANDS = {
     "RRC": {
         "description": "Rotate Right Accumulator",
         "function": "rotate_right_accumulator",
+        "parameters": {},
+    },
+    "RLC": {
+        "description": "Rotate Left Accumulator",
+        "function": "rotate_left_accumulator",
         "parameters": {},
     },
     "LDAX": {

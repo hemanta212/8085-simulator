@@ -249,6 +249,26 @@ class Command:
             f"\nFLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
         )
 
+    def and_accumulator(self, args: tuple) -> None:
+        """
+        Bitwise Logical AND with accumulator and a register
+        """
+        logger.debug(f"AND Accumulator: {args}")
+        register = args[0]
+        value = self.state.registers[register]
+        acc_value = self.state.accumulator
+        result = int(acc_value, 16) & int(value, 16)
+        self.change_state_flags(zero=True if result == 0 else False)
+        self.state.accumulator = f"0x{result:02x}"
+        logger.debug(f"{value} AND {acc_value} -> {result}:{self.state.accumulator}")
+        print(
+            f"{hex_to_simple(acc_value)} & {hex_to_simple(value)} -> {hex_to_simple(self.state.accumulator)}"
+        )
+        if self.state.flags["zero"]:
+            print(
+                f"FLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
+            )
+
     def and_immediate(self, args: tuple) -> None:
         """
         Bitwise Logical AND with accumulator and 8 byte data
@@ -263,6 +283,26 @@ class Command:
         logger.debug(f"{value} AND {acc_value} -> {result}:{self.state.accumulator}")
         print(
             f"{hex_to_simple(acc_value)} & {hex_to_simple(formatted_value)} -> {hex_to_simple(self.state.accumulator)}"
+        )
+        if self.state.flags["zero"]:
+            print(
+                f"FLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
+            )
+
+    def or_accumulator(self, args: tuple) -> None:
+        """
+        Bitwise Logical OR with accumulator and a register
+        """
+        logger.debug(f"OR Accumulator: {args}")
+        register = args[0]
+        value = self.state.registers[register]
+        acc_value = self.state.accumulator
+        result = int(acc_value, 16) | int(value, 16)
+        self.change_state_flags(zero=True if result == 0 else False)
+        self.state.accumulator = f"0x{result:02x}"
+        logger.debug(f"{value} OR {acc_value} -> {result}:{self.state.accumulator}")
+        print(
+            f"{hex_to_simple(acc_value)} | {hex_to_simple(value)} -> {hex_to_simple(self.state.accumulator)}"
         )
         if self.state.flags["zero"]:
             print(
@@ -296,11 +336,11 @@ class Command:
         1001 -> RRC -> 1100 [CY->1]
         """
         logger.debug(f"RRC: ")
-        acc_value = self.state.accumulator
-        result = int(acc_value, 16) >> 1
-        shifted_bit = int(acc_value, 16) & 1
+        acc_value = int(self.state.accumulator, 16)
+        result = acc_value >> 1
+        shifted_bit = acc_value & int("0000_0001", 2)
         if shifted_bit:
-            result = result | int("80", 16)
+            result = result | int("1000_0000", 2)
         self.change_state_flags(carry=True if shifted_bit == 1 else False)
         self.change_state_flags(zero=True if result == 0 else False)
         self.state.accumulator = f"0x{result:02x}"
@@ -308,9 +348,46 @@ class Command:
             f"{acc_value} >> 1 -> {result}:{self.state.accumulator} CY->{shifted_bit}"
         )
         print(
-            f"{hex_to_simple(acc_value)} >> 1 -> {hex_to_simple(self.state.accumulator)}"
+            f"{hex_to_simple(hex(acc_value))} >> 1 -> {hex_to_simple(self.state.accumulator)}"
             f"\nFLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
         )
+
+    def rotate_left_accumulator(self) -> None:
+        """
+        Rotate Left Accumulator
+        Copy the MSB to carry and last place of byte
+        1001 -> RLC -> 0011 [CY->1]
+        """
+        logger.debug(f"RLC: ")
+        acc_value = int(self.state.accumulator, 16)
+        result = acc_value << 1
+        shifted_bit = acc_value & int("1000_0000", 2)
+        logger.debug(f"shifted value {shifted_bit} {result}")
+        if shifted_bit == int("1000_0000", 2):
+            result = result | 1
+        result = result & int("1111_1111", 2)
+        self.change_state_flags(
+            carry=True if shifted_bit == int("1000_0000", 2) else False
+        )
+        self.change_state_flags(zero=True if result == 0 else False)
+        self.change_state_flags(sign=True if result & int("1000_0000", 2) else False)
+        self.state.accumulator = f"0x{result:02x}"
+        logger.debug(
+            f"{acc_value} << 1 -> {result}:{self.state.accumulator} CY->{shifted_bit}"
+        )
+        print(
+            f"{hex_to_simple(hex(acc_value))} << 1 -> {hex_to_simple(self.state.accumulator)}"
+            f"\nFLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
+        )
+
+    def rotate_accumulator_right(self) -> None:
+        """
+        Rotate Accumulator Right with carry
+        """
+        logger.debug(f"RAR: ")
+        acc_value = self.state.accumulator
+        result = int(acc_value, 16) >> 1
+        shifted_bit = int(acc_value, 16) & int("0000_0001", 2)
         self.change_state_flags(carry=True if shifted_bit == 1 else False)
         self.change_state_flags(zero=True if result == 0 else False)
         self.state.accumulator = f"0x{result:02x}"
