@@ -30,9 +30,12 @@ jobs:
         run: |
           cd pyassm
           poetry run pyinstaller main.py --onefile --name 8085-interpreter
-          cd dist
-          apt-get install zip
-          zip windows-x64-release.zip 8085-interpreter
+
+      - name: Powershell compress to zip
+        shell: pwsh
+        run: |
+          cd .\pyassm\dist
+          powershell Compress-Archive .\8085-interpreter.exe windows-x64-release.zip
 
       - name: Release
         uses: softprops/action-gh-release@v1
