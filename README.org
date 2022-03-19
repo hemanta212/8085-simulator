@@ -1,5 +1,5 @@
 * 8085-Interpreter
-#+html: <p align="center"><a href="https://github.com/hemanta212/8085-simulator/actions/workflows/main.yml"><img src="https://github.com/hemanta212/8085-simulator/workflows/main.yml/badge.svg" /></a></p>
+#+html: <p align="center"><a href="https://github.com/hemanta212/8085-simulator/actions/workflows/main.yml"><img src="https://github.com/hemanta212/8085-simulator/actions/workflows/main.yml/badge.svg" /></a></p>
 
 A simple exploratory interpreter with REPL experience. (Beginning learning purpose only)
 
