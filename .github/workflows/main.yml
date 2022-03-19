@@ -23,7 +23,8 @@ jobs:
         run: |
           cd pyassm
           $env:Path += ";$env:Userprofile\.poetry\bin"
-          poetry install
+          poetry install --no-dev
+          poetry install pyinstaller --dev
 
       - name: Pyinstaller Exe build
         shell: bash
