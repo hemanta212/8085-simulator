@@ -17,7 +17,7 @@ jobs:
           python-version: 3.8
 
       - name: Poetry installation
-        uses: snok/install-poetry@v1.1.13
+        uses: snok/install-poetry@v1.3.1
 
       - name: Deps installation
         run: |
