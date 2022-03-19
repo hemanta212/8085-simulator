@@ -16,8 +16,10 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Poetry & deps installation
+      - name: Poetry installation
         uses: snok/install-poetry@v1.1.13
+
+      - name: Deps installation
         run: |
           cd pyassm
           $env:Path += ";$env:Userprofile\.poetry\bin"
