@@ -1,0 +1,40 @@
+name: Build
+on:
+  push:
+
+jobs:
+  linux:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+        with:
+          path: 'pyassm'
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - uses: snok/install-poetry@v1.1.1
+      - name: Poetry & deps installation
+        run: |
+          cd pyassm
+          $env:Path += ";$env:Userprofile\.poetry\bin"
+          poetry install
+
+      - name: Pyinstaller Exe build
+        shell: bash
+        run: |
+          cd pyassm
+          poetry run pyinstaller main.py --onefile --name 8085-interpreter
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            pyassm/dist/8085-interpreter.exe
+          tag_name: ${{ github.event.client_payload.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
