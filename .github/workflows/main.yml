@@ -1,0 +1,62 @@
+name: Build
+on:
+  push:
+
+jobs:
+  Windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: 'pyassm'
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Poetry installation
+        uses: snok/install-poetry@v1.3.1
+
+      - name: Deps installation
+        run: |
+          cd pyassm
+          $env:Path += ";$env:Userprofile\.poetry\bin"
+          poetry install --no-dev
+          poetry run python -m pip install pyinstaller
+
+      - name: Pyinstaller Exe build
+        shell: bash
+        run: |
+          cd pyassm
+          poetry run pyinstaller main.py --onefile --name 8085-interpreter
+
+      - name: Powershell compress to zip
+        shell: pwsh
+        run: |
+          cd .\pyassm\dist
+          powershell Compress-Archive .\8085-interpreter.exe windows-x64-release.zip
+
+      - name: Generate changelog
+        shell: bash
+        run: |
+          cd pyassm
+          echo "# Changelog" > CHANGELOG.txt
+          echo "## What's New" >> CHANGELOG.txt
+          git log $(git describe --tags --abbrev=0 @^)..HEAD --pretty=format:"%h: %s" -i -E --grep="^(feat|fix)*feat" >> CHANGELOG.txt
+          echo " " >> CHANGELOG.txt
+          echo "## Bug Fixes" >> CHANGELOG.txt
+          git log $(git describe --tags --abbrev=0 @^)..HEAD --pretty=format:"%h: %s" -i -E --grep="^(feat|fix)*fix" >> CHANGELOG.txt
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            pyassm/dist/windows-x64-release.zip
+          body_path: pyassm/CHANGELOG.txt
+          tag_name: ${{ github.event.client_payload.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
