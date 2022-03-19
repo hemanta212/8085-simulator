@@ -43,6 +43,7 @@ jobs:
         with:
           files: |
             pyassm/dist/windows-x64-release.zip
+          body_path: pyassm/CHANGELOG.txt
           tag_name: ${{ github.event.client_payload.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

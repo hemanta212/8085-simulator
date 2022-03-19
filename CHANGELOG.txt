@@ -1,0 +1,18 @@
+# What's New ?
+
+use powershell for zipping
+Fixes action's version
+fix workfile syntax
+apt install zip
+zip file
+Add actions
+Fix: double logging typo in RRC. Update readme
+fix: rrc rotate bug when carrry
+feat: add command RRC
+fix: call function without passing args to those which dont need it
+fix: format input to 8-byte for all commands
+feat: add ANI and ORI command
+fix: FLAGS info frequency and formatting
+feat: Add command STAX
+feat: add and adi command flag modification
+Add support for Custom Dict, comma, emacs major mode, usage examples
