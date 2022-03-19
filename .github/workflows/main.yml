@@ -28,13 +28,15 @@ jobs:
         run: |
           cd pyassm
           poetry run pyinstaller main.py --onefile --name 8085-interpreter
+          cd dist
+          zip windows-release.zip 8085-interpreter
 
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            pyassm/dist/8085-interpreter.exe
+            pyassm/dist/windows-release.zip
           tag_name: ${{ github.event.client_payload.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
