@@ -47,6 +47,7 @@ For detailed examples on available commands, see file [[file:usage_examples.org]
 - [x] - Implement basic commands (CMP/CPI, OUT)
 - [x] - Implement comments, empty lines, HLT(no-effect)
 - [x] - Release a pyinstaller executable
+- [ ] - Implement commands (ANI, ORI, RRC, STAX)
 - [ ] - ... ( a lot of commands)
 - [ ] - Implement proper 8-bit 16-bit type system and validation
 - [ ] - Implement a stacktrace in case of errors
@@ -87,7 +88,11 @@ ADI - Add Immediate
 SUI - Subtract Immediate
 CMP - Compare
 CPI - Compare Immediate
+ANI - And Immediate with Accumulator
+ORI - OR Immediate with Accumulator
+RRC - Rotate Right Accumulator
 LDAX - Load accumulator from register pair
+STAX - Store accumulator to register pair
 INX - Incremented xtended register pairs
 DCX - Decrement xtended register pairs
 JZ - Jump If Zero

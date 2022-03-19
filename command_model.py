@@ -311,16 +311,6 @@ class Command:
             f"{hex_to_simple(acc_value)} >> 1 -> {hex_to_simple(self.state.accumulator)}"
             f"\nFLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
         )
-        self.change_state_flags(carry=True if shifted_bit == 1 else False)
-        self.change_state_flags(zero=True if result == 0 else False)
-        self.state.accumulator = f"0x{result:02x}"
-        logger.debug(
-            f"{acc_value} >> 1 -> {result}:{self.state.accumulator} CY->{shifted_bit}"
-        )
-        print(
-            f"{hex_to_simple(acc_value)} >> 1 -> {hex_to_simple(self.state.accumulator)}"
-            f"\nFLAGS: CY->{int(self.state.flags['carry'])}, S->{int(self.state.flags['sign'])}, Z->{int(self.state.flags['zero'])}"
-        )
 
     def increment_register(self, args: tuple) -> None:
         """

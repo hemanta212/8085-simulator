@@ -17,7 +17,11 @@
   - [[#out][OUT]]
   - [[#lxi][LXI]]
   - [[#inxdcx][INX/DCX]]
+  - [[#stax][STAX]]
   - [[#ldax][LDAX]]
+  - [[#ani][ANI]]
+  - [[#ori][ORI]]
+  - [[#rrc][RRC]]
 - [[#practice-problems][Practice Problems]]
   - [[#register-setup-from-1260-to-1264][Register setup from 1260 to 1264]]
   - [[#simple][SIMPLE]]
@@ -452,8 +456,8 @@ For other we have to manually load the value to Accumulator
 : A -> 02H
 : 02H >> 1 -> 01H
 : FLAGS: CY->0, S->0, Z->0
-: 01H >> 1 -> 00H
-: FLAGS: CY->1, S->0, Z->1
+: 01H >> 1 -> 80H
+: FLAGS: CY->1, S->0, Z->0
 
 * Practice Problems
 ** Register setup from 1260 to 1264
