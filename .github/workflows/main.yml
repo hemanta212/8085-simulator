@@ -44,9 +44,9 @@ jobs:
         run: |
           cd pyassm
           echo "# Changelog" > CHANGELOG.txt
-          echo "\n## What's New" >> CHANGELOG.txt
+          echo "## What's New" >> CHANGELOG.txt
           git log $(git describe --tags --abbrev=0 @^)..HEAD --pretty=format:"%h: %s" -i -E --grep="^(feat|fix)*feat" >> CHANGELOG.txt
-          echo "\n\n## Bug Fixes" >> CHANGELOG.txt
+          echo "## Bug Fixes" >> CHANGELOG.txt
           git log $(git describe --tags --abbrev=0 @^)..HEAD --pretty=format:"%h: %s" -i -E --grep="^(feat|fix)*fix" >> CHANGELOG.txt
 
       - name: Release
