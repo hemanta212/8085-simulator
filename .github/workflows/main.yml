@@ -24,7 +24,7 @@ jobs:
           cd pyassm
           $env:Path += ";$env:Userprofile\.poetry\bin"
           poetry install --no-dev
-          poetry install pyinstaller --dev
+          poetry add pyinstaller --dev
 
       - name: Pyinstaller Exe build
         shell: bash
@@ -37,6 +37,16 @@ jobs:
         run: |
           cd .\pyassm\dist
           powershell Compress-Archive .\8085-interpreter.exe windows-x64-release.zip
+
+      - name: Generate changelog
+        shell: bash
+        run: |
+          cd pyassm
+          echo "# Changelog" > CHANGELOG.txt
+          echo "\n## What's New" >> CHANGELOG.txt
+          git log $(git describe --tags --abbrev=0 @^)..HEAD --pretty=format:"%h: %s" -i -E --grep="^(feat|fix)*feat" >> CHANGELOG.txt
+          echo "\n\n## Bug Fixes" >> CHANGELOG.txt
+          git log $(git describe --tags --abbrev=0 @^)..HEAD --pretty=format:"%h: %s" -i -E --grep="^(feat|fix)*fix" >> CHANGELOG.txt
 
       - name: Release
         uses: softprops/action-gh-release@v1
